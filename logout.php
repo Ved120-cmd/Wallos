@@ -1,15 +1,9 @@
 <?php
 require_once 'includes/connect.php';
 require_once 'includes/oidc_settings.php';
-$secondsInMonth = 30 * 24 * 60 * 60;
-if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params([
-        'lifetime' => $secondsInMonth,             
-        'httponly' => true,          
-        'samesite' => 'Lax'          
-    ]);
-    session_start();
-}
+require_once 'includes/session_bootstrap.php';
+
+wallos_bootstrap_session();
 
 $logoutOIDC = false;
 

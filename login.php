@@ -9,21 +9,14 @@ require_once 'includes/i18n/' . $lang . '.php';
 
 require_once 'includes/version.php';
 require_once 'includes/theme_helpers.php';
+require_once 'includes/session_bootstrap.php';
 
 if ($userCount == 0) {
     header("Location: registration.php");
     exit();
 }
 
-$secondsInMonth = 30 * 24 * 60 * 60;
-if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params([
-        'lifetime' => $secondsInMonth,             
-        'httponly' => true,          
-        'samesite' => 'Lax'          
-    ]);
-    session_start();
-}
+wallos_bootstrap_session();
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     $db->close();
     header("Location: .");
@@ -131,15 +124,7 @@ if ($oidcEnabled) {
     $password_login_disabled = (int) $oidcSettings['password_login_disabled'] === 1;
 
     // Generate a CSRF-protecting state string
-    $secondsInMonth = 30 * 24 * 60 * 60;
-    if (session_status() === PHP_SESSION_NONE) {
-        session_set_cookie_params([
-            'lifetime' => $secondsInMonth,
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
-        session_start();
-    }
+    wallos_bootstrap_session();
     $state = bin2hex(random_bytes(16));
     $_SESSION['oidc_state'] = $state;
 

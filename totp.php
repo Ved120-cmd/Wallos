@@ -8,13 +8,14 @@ require_once 'includes/i18n/' . $lang . '.php';
 
 require_once 'includes/version.php';
 require_once 'includes/theme_helpers.php';
+require_once 'includes/session_bootstrap.php';
 
 if ($userCount == 0) {
     header("Location: registration.php");
     exit();
 }
 
-session_start();
+wallos_bootstrap_session();
 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     $db->close();
