@@ -121,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     // If the user is not found, return an error
     if (!$user) {
@@ -150,7 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $lastExchangeUpdate = $result->fetchArray(SQLITE3_ASSOC);
+    $lastExchangeUpdate = $result->fetchArray(PDO::FETCH_ASSOC);
     $canConvertCurrency = empty($lastExchangeUpdate['date']) ? false : true;
 
     // Get currencies for user
@@ -159,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $currencies = [];
-    while ($currency = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($currency = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $currencies[$currency['id']] = $currency;
     }
 
@@ -169,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $categories = [];
-    while ($category = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($category = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $categories[$category['id']] = $category['name'];
     }
 
@@ -179,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $members = [];
-    while ($member = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($member = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $members[$member['id']] = $member['name'];
     }
 
@@ -189,7 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $paymentMethods = [];
-    while ($paymentMethod = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($paymentMethod = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $paymentMethods[$paymentMethod['id']] = $paymentMethod['name'];
     }
 
@@ -282,13 +282,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     }
     if (!empty($params)) {
         foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value, SQLITE3_INTEGER);
+            $stmt->bindValue($key, $value, PDO::PARAM_INT);
         }
     }
     $result = $stmt->execute();
     if ($result) {
         $subscriptions = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $subscriptions[] = $row;
         }
     }
@@ -314,11 +314,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     ];
 
     if ($allUserSubscription == 1 && $userId == 1) {
-        $sql = "PRAGMA table_info(user)";
+        $sql = "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'user'";
         $stmt = $db->prepare($sql);
         $result = $stmt->execute();
         $userColumns = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $userColumns[] = $row['name'];
         }
         $userNameCol = in_array('username', $userColumns) ? 'username' : null;
@@ -335,7 +335,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
         $stmt = $db->prepare($sql);
         $result = $stmt->execute();
         $users = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $users[] = $row;
         }
         $response['users'] = $users;

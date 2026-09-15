@@ -22,7 +22,7 @@ $i18n = [
     "setup_token" => "설정 토큰",
     "restore_database_info" => "백업을 복원하려면 설정 토큰이 필요합니다. 다음 방법 중 하나로 확인하세요:",
     "setup_token_docker" => "Docker: 서버에서 docker logs &lt;컨테이너 이름&gt; 명령을 실행한 다음 \"Setup token for database restore\"를 확인하세요.",
-    "setup_token_file" => "베어 메탈: 서버 db/setup_token.db를 확인하세요.",
+    "setup_token_file" => "베어 메탈: 서버 the WALLOS_SETUP_TOKEN environment variable를 확인하세요.",
     "select_backup_file" => "백업 파일 선택",
     // Login Page
     "please_login" => "로그인이 필요합니다.",

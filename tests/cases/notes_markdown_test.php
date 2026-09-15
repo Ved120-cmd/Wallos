@@ -62,9 +62,9 @@ wallos_test('the notes migration decodes existing escaped notes, and is safe to 
     $escaped = 'AT&amp;T &quot;great&quot; deal&#039;s';
 
     $stmt = $db->prepare("INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, frequency, inactive, notes)
-                          VALUES (1, 'Netflix', 9.99, :currencyId, date('now', '+5 days'), 3, 1, 0, :notes)");
-    $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), SQLITE3_INTEGER);
-    $stmt->bindValue(':notes', $escaped, SQLITE3_TEXT);
+                          VALUES (1, 'Netflix', 9.99, :currencyId, CURRENT_DATE + INTERVAL '5 days', 3, 1, 0, :notes)");
+    $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), PDO::PARAM_INT);
+    $stmt->bindValue(':notes', $escaped, PDO::PARAM_STR);
     $stmt->execute();
 
     require WALLOS_ROOT . '/migrations/000058.php';

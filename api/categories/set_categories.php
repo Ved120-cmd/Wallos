@@ -50,9 +50,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -90,18 +90,18 @@ switch ($action) {
 
         // Get next order sequence
         $stmtOrder = $db->prepare('SELECT MAX("order") as maxOrder FROM categories WHERE user_id = :userId');
-        $stmtOrder->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtOrder->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultOrder = $stmtOrder->execute();
-        $rowOrder = $resultOrder->fetchArray(SQLITE3_ASSOC);
+        $rowOrder = $resultOrder->fetchArray(PDO::FETCH_ASSOC);
         $maxOrder = $rowOrder['maxOrder'] ?? 0;
         $order = $maxOrder + 1;
 
         // Insert
         $sqlInsert = 'INSERT INTO categories ("name", "order", "user_id") VALUES (:name, :order, :userId)';
         $stmtInsert = $db->prepare($sqlInsert);
-        $stmtInsert->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':order', $order, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtInsert->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':order', $order, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultInsert = $stmtInsert->execute();
 
         if ($resultInsert) {
@@ -138,10 +138,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM categories WHERE id = :categoryId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':categoryId', $categoryId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $category = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $category = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$category) {
             echo json_encode([
@@ -155,9 +155,9 @@ switch ($action) {
         // Update
         $sqlEdit = "UPDATE categories SET name = :name WHERE id = :categoryId AND user_id = :userId";
         $stmtEdit = $db->prepare($sqlEdit);
-        $stmtEdit->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtEdit->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $stmtEdit->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtEdit->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtEdit->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmtEdit->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultEdit = $stmtEdit->execute();
 
         if ($resultEdit) {
@@ -201,10 +201,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM categories WHERE id = :categoryId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':categoryId', $categoryId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $category = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $category = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$category) {
             echo json_encode([
@@ -218,8 +218,8 @@ switch ($action) {
         // Check if category is in use
         $checkUseSql = "SELECT COUNT(*) FROM subscriptions WHERE category_id = :categoryId AND user_id = :userId";
         $checkUseStmt = $db->prepare($checkUseSql);
-        $checkUseStmt->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $checkUseStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkUseStmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $checkUseStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkUseResult = $checkUseStmt->execute();
         $row = $checkUseResult->fetchArray();
         $count = $row[0] ?? 0;
@@ -236,8 +236,8 @@ switch ($action) {
         // Delete
         $sqlDelete = "DELETE FROM categories WHERE id = :categoryId AND user_id = :userId";
         $stmtDelete = $db->prepare($sqlDelete);
-        $stmtDelete->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $stmtDelete->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtDelete->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmtDelete->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultDelete = $stmtDelete->execute();
 
         if ($resultDelete) {

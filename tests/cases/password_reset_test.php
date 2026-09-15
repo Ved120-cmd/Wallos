@@ -26,9 +26,9 @@ function password_reset_source()
 wallos_test('issuing a token is one transaction', function () {
     $source = password_reset_source();
 
-    assert_contains("'BEGIN'", $source, 'the token swap opens a transaction');
-    assert_contains("'COMMIT'", $source, 'and commits it');
-    assert_contains("'ROLLBACK'", $source, 'and rolls back when a write fails');
+    assert_contains('beginTransaction', $source, 'the token swap opens a transaction');
+    assert_contains('commit', $source, 'and commits it');
+    assert_contains('rollBack', $source, 'and rolls back when a write fails');
 });
 
 wallos_test('no write in the file is discarded', function () {
@@ -69,21 +69,21 @@ wallos_test('a rolled back token swap leaves the previous token in place', funct
 
     $stmt = $db->prepare('INSERT INTO password_resets (user_id, email, token)
                           VALUES (1, :email, :token)');
-    $stmt->bindValue(':email', 'alice@example.com', SQLITE3_TEXT);
-    $stmt->bindValue(':token', 'the-old-token', SQLITE3_TEXT);
+    $stmt->bindValue(':email', 'alice@example.com', PDO::PARAM_STR);
+    $stmt->bindValue(':token', 'the-old-token', PDO::PARAM_STR);
     $stmt->execute();
 
-    $db->exec('BEGIN');
+    $db->beginTransaction();
 
     $stmt = $db->prepare('DELETE FROM password_resets WHERE email = :email');
-    $stmt->bindValue(':email', 'alice@example.com', SQLITE3_TEXT);
+    $stmt->bindValue(':email', 'alice@example.com', PDO::PARAM_STR);
     $stmt->execute();
 
     assert_same(0, (int) $db->querySingle('SELECT COUNT(*) FROM password_resets'),
         'the previous token is gone inside the transaction');
 
     // The insert that does not happen: the failure this exists for.
-    $db->exec('ROLLBACK');
+    $db->rollBack();
 
     assert_same('the-old-token',
         (string) $db->querySingle("SELECT token FROM password_resets WHERE email = 'alice@example.com'"),

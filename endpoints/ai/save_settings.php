@@ -68,7 +68,7 @@ if (in_array($aiType, ['ollama', 'openai-compatible'])) {
 // handed, so the account can go on talking to the provider and the key it just
 // replaced - after being told the new one was saved.
 $stmt = $db->prepare("DELETE FROM ai_settings WHERE user_id = ?");
-$stmt->bindValue(1, $userId, SQLITE3_INTEGER);
+$stmt->bindValue(1, $userId, PDO::PARAM_INT);
 $deleted = $stmt->execute();
 $stmt->close();
 
@@ -81,13 +81,13 @@ $stmt = $db->prepare("
     INSERT INTO ai_settings (user_id, type, enabled, api_key, model, url, run_schedule)
     VALUES (:user_id, :type, :enabled, :api_key, :model, :url, :run_schedule)
 ");
-$stmt->bindValue(':user_id',  $userId,      SQLITE3_INTEGER);
-$stmt->bindValue(':type',     $aiType,      SQLITE3_TEXT);
-$stmt->bindValue(':enabled',  $aiEnabled,   SQLITE3_INTEGER);
-$stmt->bindValue(':api_key',  $aiApiKey,    SQLITE3_TEXT);
-$stmt->bindValue(':model',    $aiModel,     SQLITE3_TEXT);
-$stmt->bindValue(':url',      $aiOllamaHost,SQLITE3_TEXT);
-$stmt->bindValue(':run_schedule', $aiSchedule, SQLITE3_TEXT);
+$stmt->bindValue(':user_id',  $userId,      PDO::PARAM_INT);
+$stmt->bindValue(':type',     $aiType,      PDO::PARAM_STR);
+$stmt->bindValue(':enabled',  $aiEnabled,   PDO::PARAM_INT);
+$stmt->bindValue(':api_key',  $aiApiKey,    PDO::PARAM_STR);
+$stmt->bindValue(':model',    $aiModel,     PDO::PARAM_STR);
+$stmt->bindValue(':url',      $aiOllamaHost,PDO::PARAM_STR);
+$stmt->bindValue(':run_schedule', $aiSchedule, PDO::PARAM_STR);
 $result = $stmt->execute();
 
 if ($result) {

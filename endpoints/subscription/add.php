@@ -240,7 +240,8 @@ $frequency = $_POST["frequency"];
 $cycle = $_POST["cycle"];
 $nextPayment = $_POST["next_payment"];
 $autoRenew = isset($_POST['auto_renew']) ? true : false;
-$startDate = $_POST["start_date"];
+$startDate = $_POST["start_date"] ?? null;
+$startDate = $startDate !== null && trim((string) $startDate) !== '' ? $startDate : null;
 $paymentMethodId = $_POST["payment_method_id"];
 $payerUserId = $_POST["payer_user_id"];
 $categoryId = $_POST['category_id'];
@@ -253,7 +254,22 @@ $notify = isset($_POST['notifications']) ? true : false;
 $notifyDaysBefore = $_POST['notify_days_before'];
 $inactive = isset($_POST['inactive']) ? true : false;
 $cancellationDate = $_POST['cancellation_date'] ?? null;
+$cancellationDate = $cancellationDate !== null && trim((string) $cancellationDate) !== '' ? $cancellationDate : null;
 $replacementSubscriptionId = $_POST['replacement_subscription_id'];
+
+if ($startDate !== null) {
+    $parsedStartDate = DateTimeImmutable::createFromFormat('!Y-m-d', $startDate);
+    $parsedNextPayment = DateTimeImmutable::createFromFormat('!Y-m-d', $nextPayment);
+
+    if ($parsedStartDate === false || $parsedNextPayment === false || $parsedNextPayment <= $parsedStartDate) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'Error',
+            'message' => 'Next payment date must be later than the start date.'
+        ]);
+        exit;
+    }
+}
 
 if ($replacementSubscriptionId == 0 || $inactive == 0) {
     $replacementSubscriptionId = null;
@@ -261,8 +277,8 @@ if ($replacementSubscriptionId == 0 || $inactive == 0) {
 
 if ($replacementSubscriptionId !== null) {
     $ownerCheck = $db->prepare("SELECT id FROM subscriptions WHERE id = :id AND user_id = :userId");
-    $ownerCheck->bindParam(':id', $replacementSubscriptionId, SQLITE3_INTEGER);
-    $ownerCheck->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $ownerCheck->bindParam(':id', $replacementSubscriptionId, PDO::PARAM_INT);
+    $ownerCheck->bindParam(':userId', $userId, PDO::PARAM_INT);
     $ownerResult = $ownerCheck->execute();
     if (!$ownerResult || !$ownerResult->fetchArray()) {
         $replacementSubscriptionId = null;
@@ -343,10 +359,10 @@ if (!$isEdit) {
     $oldLogoVariant = null;
     if ($logo != "") {
         $oldLogoStmt = $db->prepare("SELECT logo, logo_variant FROM subscriptions WHERE id = :id AND user_id = :userId");
-        $oldLogoStmt->bindParam(':id', $id, SQLITE3_INTEGER);
-        $oldLogoStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $oldLogoStmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $oldLogoStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $oldLogoResult = $oldLogoStmt->execute();
-        if ($oldLogoResult && ($oldLogoRow = $oldLogoResult->fetchArray(SQLITE3_ASSOC))) {
+        if ($oldLogoResult && ($oldLogoRow = $oldLogoResult->fetchArray(PDO::FETCH_ASSOC))) {
             $oldLogo = $oldLogoRow['logo'];
             $oldLogoVariant = $oldLogoRow['logo_variant'];
         }
@@ -380,33 +396,43 @@ if (!$isEdit) {
 }
 
 $stmt = $db->prepare($sql);
-$stmt->bindParam(':name', $name, SQLITE3_TEXT);
-if ($logo != "") {
-    $stmt->bindParam(':logo', $logo, SQLITE3_TEXT);
-    $stmt->bindParam(':logoTextColor', $logoTextColor, SQLITE3_TEXT);
-    $stmt->bindParam(':logoVariant', $logoVariant, SQLITE3_TEXT);
+$stmt->bindParam(':name', $name, PDO::PARAM_STR);
+if (!$isEdit || $logo != "") {
+    $stmt->bindParam(':logo', $logo, PDO::PARAM_STR);
 }
-$stmt->bindParam(':price', $price, SQLITE3_FLOAT);
-$stmt->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-$stmt->bindParam(':nextPayment', $nextPayment, SQLITE3_TEXT);
-$stmt->bindParam(':autoRenew', $autoRenew, SQLITE3_INTEGER);
-$stmt->bindParam(':startDate', $startDate, SQLITE3_TEXT);
-$stmt->bindParam(':cycle', $cycle, SQLITE3_INTEGER);
-$stmt->bindParam(':frequency', $frequency, SQLITE3_INTEGER);
-$stmt->bindParam(':notes', $notes, SQLITE3_TEXT);
-$stmt->bindParam(':paymentMethodId', $paymentMethodId, SQLITE3_INTEGER);
-$stmt->bindParam(':payerUserId', $payerUserId, SQLITE3_INTEGER);
-$stmt->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-$stmt->bindParam(':notify', $notify, SQLITE3_INTEGER);
-$stmt->bindParam(':inactive', $inactive, SQLITE3_INTEGER);
-$stmt->bindParam(':url', $url, SQLITE3_TEXT);
-$stmt->bindParam(':notifyDaysBefore', $notifyDaysBefore, SQLITE3_INTEGER);
-$stmt->bindParam(':cancellationDate', $cancellationDate, SQLITE3_TEXT);
+if (!$isEdit || $logo != "") {
+    $stmt->bindParam(':logoTextColor', $logoTextColor, PDO::PARAM_STR);
+    $stmt->bindParam(':logoVariant', $logoVariant, PDO::PARAM_STR);
+}
+$stmt->bindParam(':price', $price, PDO::PARAM_STR);
+$stmt->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+$stmt->bindParam(':nextPayment', $nextPayment, PDO::PARAM_STR);
+$stmt->bindParam(':autoRenew', $autoRenew, PDO::PARAM_INT);
+if ($startDate === null) {
+    $stmt->bindValue(':startDate', null, PDO::PARAM_NULL);
+} else {
+    $stmt->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+}
+$stmt->bindParam(':cycle', $cycle, PDO::PARAM_INT);
+$stmt->bindParam(':frequency', $frequency, PDO::PARAM_INT);
+$stmt->bindParam(':notes', $notes, PDO::PARAM_STR);
+$stmt->bindParam(':paymentMethodId', $paymentMethodId, PDO::PARAM_INT);
+$stmt->bindParam(':payerUserId', $payerUserId, PDO::PARAM_INT);
+$stmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+$stmt->bindParam(':notify', $notify, PDO::PARAM_INT);
+$stmt->bindParam(':inactive', $inactive, PDO::PARAM_INT);
+$stmt->bindParam(':url', $url, PDO::PARAM_STR);
+$stmt->bindParam(':notifyDaysBefore', $notifyDaysBefore, PDO::PARAM_INT);
+if ($cancellationDate === null) {
+    $stmt->bindValue(':cancellationDate', null, PDO::PARAM_NULL);
+} else {
+    $stmt->bindParam(':cancellationDate', $cancellationDate, PDO::PARAM_STR);
+}
 if ($isEdit) {
-    $stmt->bindParam(':id', $id, SQLITE3_INTEGER);
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 }
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
-$stmt->bindParam(':replacement_subscription_id', $replacementSubscriptionId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+$stmt->bindParam(':replacement_subscription_id', $replacementSubscriptionId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     $success['status'] = "Success";
@@ -430,7 +456,11 @@ if ($stmt->execute()) {
     echo json_encode($success);
     exit();
 } else {
-    echo translate('error', $i18n) . ": " . $db->lastErrorMsg();
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'Error',
+        'message' => translate('error', $i18n) . ': ' . $db->lastErrorMsg()
+    ]);
 }
 $db->close();
 ?>

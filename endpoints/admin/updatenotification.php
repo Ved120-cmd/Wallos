@@ -10,7 +10,7 @@ $updateNotification = $data['notificationEnabled'];
 
 // Save settings
 $stmt = $db->prepare('UPDATE admin SET update_notification = :update_notification');
-$stmt->bindValue(':update_notification', $updateNotification, SQLITE3_INTEGER);
+$stmt->bindValue(':update_notification', $updateNotification, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result) {

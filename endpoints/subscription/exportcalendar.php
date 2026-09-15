@@ -10,8 +10,8 @@ $data = json_decode($postData, true);
 $id = $data['id'];
 
 $stmt = $db->prepare('SELECT * FROM subscriptions WHERE id = :id AND user_id = :userId');
-$stmt->bindParam(':id', $id, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $_SESSION['userId'], SQLITE3_INTEGER);
+$stmt->bindParam(':id', $id, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $_SESSION['userId'], PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result === false) {
@@ -21,7 +21,7 @@ if ($result === false) {
     ]));
 }
 
-$subscription = $result->fetchArray(SQLITE3_ASSOC); // Fetch the subscription details as an associative array
+$subscription = $result->fetchArray(PDO::FETCH_ASSOC); // Fetch the subscription details as an associative array
 
 if ($subscription) {
     $subscription['payer_user'] = $members[$subscription['payer_user_id']]['name'];

@@ -17,8 +17,8 @@ if (!isset($monthly_price) || !is_bool($monthly_price)) {
 }
 
 $stmt = $db->prepare('UPDATE settings SET monthly_price = :monthly_price WHERE user_id = :userId');
-$stmt->bindParam(':monthly_price', $monthly_price, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':monthly_price', $monthly_price, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

@@ -28,21 +28,21 @@ function cancellation_cron_query()
 /**
  * Runs the cron's query for one user and returns the subscription names it picks.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @return array
  */
 function cancellation_cron_names($db, $userId)
 {
     $stmt = $db->prepare(cancellation_cron_query());
-    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
-    $stmt->bindValue(':inactive', 0, SQLITE3_INTEGER);
-    $stmt->bindValue(':cancellationDate', date('Y-m-d'), SQLITE3_TEXT);
-    $stmt->bindValue(':oneTimeCycle', 5, SQLITE3_INTEGER);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':inactive', 0, PDO::PARAM_INT);
+    $stmt->bindValue(':cancellationDate', date('Y-m-d'), PDO::PARAM_STR);
+    $stmt->bindValue(':oneTimeCycle', 5, PDO::PARAM_INT);
 
     $names = [];
     $result = $stmt->execute();
-    while ($result && $row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($result && $row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $names[] = $row['name'];
     }
     sort($names);
@@ -70,12 +70,12 @@ wallos_test('the cancellation cron skips one-time purchases due today', function
     $stmt = $db->prepare('INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, frequency, inactive, cancellation_date)
                           VALUES (1, :name, 9.99, :currencyId, :nextPayment, :cycle, 1, :inactive, :cancellationDate)');
     foreach ($rows as [$name, $cycle, $inactive, $cancellationDate]) {
-        $stmt->bindValue(':name', $name, SQLITE3_TEXT);
-        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), SQLITE3_INTEGER);
-        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+5 days')), SQLITE3_TEXT);
-        $stmt->bindValue(':cycle', $cycle, SQLITE3_INTEGER);
-        $stmt->bindValue(':inactive', $inactive, SQLITE3_INTEGER);
-        $stmt->bindValue(':cancellationDate', $cancellationDate, SQLITE3_TEXT);
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), PDO::PARAM_INT);
+        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+5 days')), PDO::PARAM_STR);
+        $stmt->bindValue(':cycle', $cycle, PDO::PARAM_INT);
+        $stmt->bindValue(':inactive', $inactive, PDO::PARAM_INT);
+        $stmt->bindValue(':cancellationDate', $cancellationDate, PDO::PARAM_STR);
         $stmt->execute();
     }
 
@@ -105,12 +105,12 @@ wallos_test('the shared helper skips one-time purchases and the other exclusions
     $stmt = $db->prepare('INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, frequency, inactive, cancellation_date)
                           VALUES (1, :name, 10.00, :currencyId, :nextPayment, :cycle, 1, :inactive, :cancellationDate)');
     foreach ($rows as [$name, $cycle, $inactive, $cancellationDate]) {
-        $stmt->bindValue(':name', $name, SQLITE3_TEXT);
-        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), SQLITE3_INTEGER);
-        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+5 days')), SQLITE3_TEXT);
-        $stmt->bindValue(':cycle', $cycle, SQLITE3_INTEGER);
-        $stmt->bindValue(':inactive', $inactive, SQLITE3_INTEGER);
-        $stmt->bindValue(':cancellationDate', $cancellationDate, $cancellationDate === null ? SQLITE3_NULL : SQLITE3_TEXT);
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), PDO::PARAM_INT);
+        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+5 days')), PDO::PARAM_STR);
+        $stmt->bindValue(':cycle', $cycle, PDO::PARAM_INT);
+        $stmt->bindValue(':inactive', $inactive, PDO::PARAM_INT);
+        $stmt->bindValue(':cancellationDate', $cancellationDate, $cancellationDate === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
         $stmt->execute();
     }
 

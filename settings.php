@@ -5,9 +5,9 @@ require_once 'includes/upcoming_payments.php';
 $currencies = array();
 $query = "SELECT * FROM currencies WHERE user_id = :userId";
 $query = $db->prepare($query);
-$query->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$query->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $query->execute();
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $currencyId = $row['id'];
     $currencies[$currencyId] = $row;
 }
@@ -136,12 +136,12 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     <?php
     $sql = "SELECT * FROM household WHERE user_id = :userId";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result) {
         $household = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $household[] = $row;
         }
     }
@@ -209,11 +209,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Notification settings
     $sql = "SELECT * FROM notification_settings WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notifications = $row;
         $rowCount++;
     }
@@ -228,11 +228,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Email notifications
     $sql = "SELECT * FROM email_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsEmail['enabled'] = $row['enabled'];
         $notificationsEmail['smtp_address'] = $row['smtp_address'];
         $notificationsEmail['smtp_port'] = $row['smtp_port'];
@@ -258,11 +258,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Discord notifications
     $sql = "SELECT * FROM discord_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsDiscord['enabled'] = $row['enabled'];
         $notificationsDiscord['webhook_url'] = $row['webhook_url'];
         $notificationsDiscord['bot_username'] = $row['bot_username'];
@@ -280,11 +280,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Pushover notifications
     $sql = "SELECT * FROM pushover_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsPushover['enabled'] = $row['enabled'];
         $notificationsPushover['token'] = $row['token'];
         $notificationsPushover['user_key'] = $row['user_key'];
@@ -300,11 +300,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Telegram notifications
     $sql = "SELECT * FROM telegram_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsTelegram['enabled'] = $row['enabled'];
         $notificationsTelegram['bot_token'] = $row['bot_token'];
         $notificationsTelegram['chat_id'] = $row['chat_id'];
@@ -321,11 +321,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // PushPlus notifications
     $sql = "SELECT * FROM pushplus_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsPushPlus['enabled'] = $row['enabled'];
         $notificationsPushPlus['token'] = $row['token'];
         $rowCount++;
@@ -339,11 +339,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Mattermost notifications
     $sql = "SELECT * FROM mattermost_notifications WHERE user_id = :userID LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userID', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userID', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsMattermost['enabled'] = $row['enabled'];
         $notificationsMattermost['webhook_url'] = $row['webhook_url'];
         $notificationsMattermost['bot_username'] = $row['bot_username'];
@@ -361,11 +361,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Serverchan notifications
     $sql = "SELECT * FROM serverchan_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsServerchan['enabled'] = $row['enabled'];
         $notificationsServerchan['sendkey'] = $row['sendkey'];
         $rowCount++;
@@ -379,11 +379,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Ntfy notifications
     $sql = "SELECT * FROM ntfy_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsNtfy['enabled'] = $row['enabled'];
         $notificationsNtfy['host'] = $row['host'];
         $notificationsNtfy['topic'] = $row['topic'];
@@ -403,10 +403,10 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Webhook notifications
     $sql = "SELECT * FROM webhook_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsWebhook['enabled'] = $row['enabled'];
         $notificationsWebhook['url'] = $row['url'];
         $notificationsWebhook['request_method'] = $row['request_method'];
@@ -441,11 +441,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     // Gotify notifications
     $sql = "SELECT * FROM gotify_notifications WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $rowCount = 0;
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsGotify['enabled'] = $row['enabled'];
         $notificationsGotify['url'] = $row['url'];
         $notificationsGotify['token'] = $row['token'];
@@ -912,14 +912,14 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     </section>
 
     <?php
-    $sql = "SELECT * FROM categories WHERE user_id = :userId ORDER BY `order` ASC";
+    $sql = "SELECT * FROM categories WHERE user_id = :userId ORDER BY \"order\" ASC";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result) {
         $categories = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $categories[] = $row;
         }
     }
@@ -928,11 +928,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     <?php
     $sql = "SELECT * FROM ai_settings WHERE user_id = :userId LIMIT 1";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $aiSettings = [];
-    if ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    if ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $aiSettings = $row;
     }
 
@@ -952,10 +952,10 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
 
                         $query = "SELECT COUNT(*) as count FROM subscriptions WHERE category_id = :categoryId AND user_id = :userId";
                         $stmt = $db->prepare($query);
-                        $stmt->bindParam(':categoryId', $category['id'], SQLITE3_INTEGER);
-                        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+                        $stmt->bindParam(':categoryId', $category['id'], PDO::PARAM_INT);
+                        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
                         $result = $stmt->execute();
-                        $row = $result->fetchArray(SQLITE3_ASSOC);
+                        $row = $result->fetchArray(PDO::FETCH_ASSOC);
                         $isUsed = $row['count'];
 
                         if ($isUsed > 0) {
@@ -1014,21 +1014,21 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     <?php
     $sql = "SELECT * FROM currencies WHERE user_id = :userId";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result) {
         $currencies = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $currencies[] = $row;
         }
     }
 
     $query = "SELECT main_currency FROM user WHERE id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $mainCurrencyId = $row['main_currency'];
 
     $query = "SELECT date FROM last_exchange_update";
@@ -1052,9 +1052,9 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                     } else {
                         $query = "SELECT COUNT(*) as count FROM subscriptions WHERE currency_id = :currencyId";
                         $stmt = $db->prepare($query);
-                        $stmt->bindParam(':currencyId', $currency['id'], SQLITE3_INTEGER);
+                        $stmt->bindParam(':currencyId', $currency['id'], PDO::PARAM_INT);
                         $result = $stmt->execute();
-                        $row = $result->fetchArray(SQLITE3_ASSOC);
+                        $row = $result->fetchArray(PDO::FETCH_ASSOC);
                         $isUsed = $row['count'];
 
                         if ($isUsed > 0) {
@@ -1130,10 +1130,10 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     $apiKey = "";
     $sql = "SELECT api_key, provider FROM fixer WHERE user_id = :userId";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
     if ($result) {
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $row = $result->fetchArray(PDO::FETCH_ASSOC);
         if ($row) {
             $apiKey = $row['api_key'];
             $provider = $row['provider'];
@@ -1199,12 +1199,12 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
 
     <?php
     $googleSearchApiKey = "";
-    if ($db->querySingle("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='google_search'") > 0) {
+    if ($db->querySingle("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'google_search'") > 0) {
         $sql = "SELECT api_key FROM google_search WHERE user_id = :userId";
         $stmt = $db->prepare($sql);
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        if ($result && ($row = $result->fetchArray(SQLITE3_ASSOC))) {
+        if ($result && ($row = $result->fetchArray(PDO::FETCH_ASSOC))) {
             $googleSearchApiKey = $row['api_key'];
         }
     }
@@ -1335,14 +1335,14 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     </section>
 
     <?php
-    $sql = "SELECT * FROM payment_methods WHERE user_id = :userId ORDER BY `order` ASC";
+    $sql = "SELECT * FROM payment_methods WHERE user_id = :userId ORDER BY \"order\" ASC";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result) {
         $payments = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $payments[] = $row;
         }
     }
@@ -1355,11 +1355,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
         <div class="payments-list" id="payments-list">
             <?php
             $paymentsInUseQuery = $db->prepare('SELECT id FROM payment_methods WHERE user_id = :userId AND id IN (SELECT DISTINCT payment_method_id FROM subscriptions WHERE user_id = :userId)');
-            $paymentsInUseQuery->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $paymentsInUseQuery->bindValue(':userId', $userId, PDO::PARAM_INT);
             $result = $paymentsInUseQuery->execute();
 
             $paymentsInUse = [];
-            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
                 $paymentsInUse[] = $row['id'];
             }
 

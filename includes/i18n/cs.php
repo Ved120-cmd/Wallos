@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Instalační token",
     "restore_database_info" => "K obnovení zálohy je vyžadován instalační token. Získejte jej jedním z níže uvedených způsobů:",
     "setup_token_docker" => "Docker: spusťte docker logs &lt;container-name&gt; a vyhledejte \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: přečtěte soubor db/setup_token.db na serveru",
+    "setup_token_file" => "Bare metal: přečtěte soubor the WALLOS_SETUP_TOKEN environment variable na serveru",
     "select_backup_file" => "Vybrat záložní soubor",
     // Login Page
     "please_login" => "Přihlaste se, prosím",

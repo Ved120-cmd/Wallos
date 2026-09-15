@@ -37,14 +37,14 @@ $cookieExpire = time() + (30 * 24 * 60 * 60);
 // Check if login is disabled
 $adminQuery = "SELECT login_disabled FROM admin";
 $adminResult = $db->query($adminQuery);
-$adminRow = $adminResult->fetchArray(SQLITE3_ASSOC);
+$adminRow = $adminResult->fetchArray(PDO::FETCH_ASSOC);
 if ($adminRow['login_disabled'] == 1) {
 
     $query = "SELECT id, username, main_currency, language FROM user WHERE id = :id";
     $stmt = $db->prepare($query);
-    $stmt->bindValue(':id', 1, SQLITE3_INTEGER);
+    $stmt->bindValue(':id', 1, PDO::PARAM_INT);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($row === false) {
         // Something is wrong with admin user. Reenable login
@@ -80,7 +80,7 @@ if ($adminRow['login_disabled'] == 1) {
         $query = "SELECT color_theme FROM settings";
         $stmt = $db->prepare($query);
         $result = $stmt->execute();
-        $settings = $result->fetchArray(SQLITE3_ASSOC);
+        $settings = $result->fetchArray(PDO::FETCH_ASSOC);
         setcookie('colorTheme', $settings['color_theme'], [
             'expires' => $cookieExpire,
             'samesite' => 'Lax',
@@ -166,9 +166,9 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
 
     $query = "SELECT id, password, main_currency, language FROM user WHERE username = :username";
     $stmt = $db->prepare($query);
-    $stmt->bindValue(':username', $username, SQLITE3_TEXT);
+    $stmt->bindValue(':username', $username, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($row) {
         $hashedPasswordFromDb = $row['password'];
@@ -180,16 +180,16 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
             // Check if the user is in the email_verification table
             $query = "SELECT 1 FROM email_verification WHERE user_id = :userId";
             $stmt = $db->prepare($query);
-            $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $result = $stmt->execute();
-            $verificationMissing = $result->fetchArray(SQLITE3_ASSOC);
+            $verificationMissing = $result->fetchArray(PDO::FETCH_ASSOC);
 
             // Check if the user has 2fa enabled
             $query = "SELECT totp_enabled FROM user WHERE id = :userId";
             $stmt = $db->prepare($query);
-            $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $result = $stmt->execute();
-            $totpEnabled = $result->fetchArray(SQLITE3_ASSOC);
+            $totpEnabled = $result->fetchArray(PDO::FETCH_ASSOC);
 
             if ($verificationMissing) {
                 $userEmailWaitingVerification = true;
@@ -210,8 +210,8 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
                     $token = bin2hex(random_bytes(32));
                     $addLoginTokens = "INSERT INTO login_tokens (user_id, token) VALUES (:userId, :token)";
                     $addLoginTokensStmt = $db->prepare($addLoginTokens);
-                    $addLoginTokensStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
-                    $addLoginTokensStmt->bindParam(':token', $token, SQLITE3_TEXT);
+                    $addLoginTokensStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+                    $addLoginTokensStmt->bindParam(':token', $token, PDO::PARAM_STR);
                     $addLoginTokensStmt->execute();
                     $_SESSION['token'] = $token;
                     $cookieValue = $username . "|" . $token . "|" . $main_currency;
@@ -241,9 +241,9 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
 
                 $query = "SELECT color_theme FROM settings WHERE user_id = :userId";
                 $stmt = $db->prepare($query);
-                $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+                $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
                 $result = $stmt->execute();
-                $settings = $result->fetchArray(SQLITE3_ASSOC);
+                $settings = $result->fetchArray(PDO::FETCH_ASSOC);
                 setcookie('colorTheme', $settings['color_theme'], [
                     'expires' => $cookieExpire,
                     'samesite' => 'Lax'
@@ -268,7 +268,7 @@ $resetPasswordEnabled = false;
 if (!$password_login_disabled) {
     $adminQuery = "SELECT registrations_open, max_users, server_url, smtp_address FROM admin";
     $adminResult = $db->query($adminQuery);
-    $adminRow = $adminResult->fetchArray(SQLITE3_ASSOC);
+    $adminRow = $adminResult->fetchArray(PDO::FETCH_ASSOC);
     $registrationsOpen = $adminRow['registrations_open'];
     $maxUsers = $adminRow['max_users'];
 
@@ -277,7 +277,7 @@ if (!$password_login_disabled) {
     } else if ($registrationsOpen == 1 && $maxUsers > 0) {
         $userCountQuery = "SELECT COUNT(id) as userCount FROM user";
         $userCountResult = $db->query($userCountQuery);
-        $userCountRow = $userCountResult->fetchArray(SQLITE3_ASSOC);
+        $userCountRow = $userCountResult->fetchArray(PDO::FETCH_ASSOC);
         $userCount = $userCountRow['userCount'];
         if ($userCount < $maxUsers) {
             $registrations = true;

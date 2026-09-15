@@ -8,7 +8,7 @@ $stmt = $db->prepare($query);
 $result = $stmt->execute();
 
 $logosOnDB = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $logosOnDB[] = $row['logo'];
     $logosOnDB[] = $row['logo_variant'];
 }
@@ -29,7 +29,7 @@ foreach ($uploadFiles as $file) {
  $stmt = $db->prepare($query);
  $result = $stmt->execute();
 
- while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+ while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
      if (!strstr($row['icon'], "images/uploads/icons/")) {
          $logosOnDB[] = $row['icon'];
      }

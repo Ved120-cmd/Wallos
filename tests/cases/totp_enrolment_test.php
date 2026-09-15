@@ -26,9 +26,9 @@ function totp_enrolment_source()
 wallos_test('the enrolment writes are one transaction', function () {
     $source = totp_enrolment_source();
 
-    assert_contains("'BEGIN'", $source, 'the enrolment opens a transaction');
-    assert_contains("'COMMIT'", $source, 'and commits it');
-    assert_contains("'ROLLBACK'", $source, 'and rolls back when a write fails');
+    assert_contains('beginTransaction', $source, 'the enrolment opens a transaction');
+    assert_contains('commit', $source, 'and commits it');
+    assert_contains('rollBack', $source, 'and rolls back when a write fails');
 });
 
 wallos_test('no write in the enrolment is discarded', function () {
@@ -59,22 +59,22 @@ wallos_test('a rolled back enrolment leaves the account exactly as it was', func
     $db = wallos_test_open_database();
     wallos_test_create_user($db, 1, 'alice');
 
-    $db->exec('BEGIN');
+    $db->beginTransaction();
 
     $stmt = $db->prepare('DELETE FROM totp WHERE user_id = :userId');
-    $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
     $stmt->execute();
 
     $stmt = $db->prepare('INSERT INTO totp (user_id, totp_secret, backup_codes, last_totp_used)
                           VALUES (:userId, :secret, :codes, :step)');
-    $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
-    $stmt->bindValue(':secret', 'SECRET', SQLITE3_TEXT);
-    $stmt->bindValue(':codes', json_encode(['a', 'b']), SQLITE3_TEXT);
-    $stmt->bindValue(':step', intdiv(time(), 30), SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
+    $stmt->bindValue(':secret', 'SECRET', PDO::PARAM_STR);
+    $stmt->bindValue(':codes', json_encode(['a', 'b']), PDO::PARAM_STR);
+    $stmt->bindValue(':step', intdiv(time(), 30), PDO::PARAM_INT);
     $stmt->execute();
 
     $stmt = $db->prepare('UPDATE user SET totp_enabled = 1 WHERE id = :userId');
-    $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
     $stmt->execute();
 
     // Both halves are in place inside the transaction.
@@ -83,7 +83,7 @@ wallos_test('a rolled back enrolment leaves the account exactly as it was', func
     assert_same(1, (int) $db->querySingle('SELECT totp_enabled FROM user WHERE id = 1'),
         'and so does the flag');
 
-    $db->exec('ROLLBACK');
+    $db->rollBack();
 
     assert_same(0, (int) $db->querySingle('SELECT COUNT(*) FROM totp WHERE user_id = 1'),
         'the enrolment row is gone again');

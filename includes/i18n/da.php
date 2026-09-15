@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Opsætningstoken",
     "restore_database_info" => "Et opsætningstoken er nødvendigt for at gendanne en sikkerhedskopi. Hent det ved hjælp af en af metoderne nedenfor:",
     "setup_token_docker" => "Docker: kør docker logs &lt;container-name&gt; og søg efter \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: læs filen db/setup_token.db på serveren",
+    "setup_token_file" => "Bare metal: læs filen the WALLOS_SETUP_TOKEN environment variable på serveren",
     "select_backup_file" => "Vælg sikkerhedskopifil",
     // Login Page
     "please_login" => "Log venligst ind",

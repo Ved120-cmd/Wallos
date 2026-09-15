@@ -19,12 +19,12 @@ function logo_cleanup_add_subscription($db, $userId, $logo, $variant = null)
 {
     $stmt = $db->prepare('INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, frequency, inactive, logo, logo_variant)
                           VALUES (:userId, :name, 1, :currencyId, :next, 3, 1, 0, :logo, :variant)');
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
-    $stmt->bindValue(':name', 'sub-' . $logo, SQLITE3_TEXT);
-    $stmt->bindValue(':currencyId', wallos_test_currency_id($userId, 0), SQLITE3_INTEGER);
-    $stmt->bindValue(':next', date('Y-m-d', strtotime('+10 days')), SQLITE3_TEXT);
-    $stmt->bindValue(':logo', $logo, SQLITE3_TEXT);
-    $stmt->bindValue(':variant', $variant, $variant === null ? SQLITE3_NULL : SQLITE3_TEXT);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':name', 'sub-' . $logo, PDO::PARAM_STR);
+    $stmt->bindValue(':currencyId', wallos_test_currency_id($userId, 0), PDO::PARAM_INT);
+    $stmt->bindValue(':next', date('Y-m-d', strtotime('+10 days')), PDO::PARAM_STR);
+    $stmt->bindValue(':logo', $logo, PDO::PARAM_STR);
+    $stmt->bindValue(':variant', $variant, $variant === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
     $stmt->execute();
 }
 
@@ -113,12 +113,12 @@ wallos_test('deleting an account clears its logos but not another account\'s', f
     // What endpoints/settings/deleteaccount.php does: gather, delete rows, sweep.
     $files = [];
     $r = $db->query('SELECT logo, logo_variant FROM subscriptions WHERE user_id = 2');
-    while ($row = $r->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $r->fetchArray(PDO::FETCH_ASSOC)) {
         $files[] = $row['logo'];
         $files[] = $row['logo_variant'];
     }
     $r = $db->query("SELECT icon FROM payment_methods WHERE user_id = 2 AND icon NOT LIKE 'images/uploads/icons/%'");
-    while ($row = $r->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $r->fetchArray(PDO::FETCH_ASSOC)) {
         $files[] = $row['icon'];
     }
     $db->exec('DELETE FROM subscriptions WHERE user_id = 2');

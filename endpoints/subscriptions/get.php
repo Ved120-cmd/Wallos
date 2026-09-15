@@ -160,7 +160,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
   $sql .= " ORDER BY " . implode(", ", $orderByClauses);
 
   $stmt = $db->prepare($sql);
-  $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+  $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
   foreach ($params as $key => $value) {
     $stmt->bindValue($key, $value);
@@ -169,7 +169,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
   $result = $stmt->execute();
   if ($result) {
     $subscriptions = array();
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
       $subscriptions[] = $row;
     }
   }

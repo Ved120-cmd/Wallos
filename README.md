@@ -86,7 +86,7 @@ See instructions to run Wallos below.
     - gd
     - intl
     - openssl
-    - sqlite3
+    - pdo_pgsql
     - zip
     - mbstring
     - fpm
@@ -100,8 +100,8 @@ See instructions to run Wallos below.
 #### Baremetal
 
 1. Download or clone this repo and move the files into your web root - usually `/var/www/html`
-2. Rename `/db/wallos.empty.db` to `/db/wallos.db`
-3. Open the app in your browser — migrations run automatically on the registration page
+2. Configure `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, and `DB_SSLMODE` (or `DATABASE_URL`)
+3. Open the app in your browser - the PostgreSQL schema and migrations run automatically on the registration page
 4. Add the following scripts to your cronjobs with `crontab -e`
 
 ```bash
@@ -127,6 +127,22 @@ See instructions to run Wallos below.
 ```bash
 php /var/www/html/endpoints/db/migrate.php
 ```
+
+### Render with PostgreSQL
+
+Deploy the Docker image as a Render Web Service and attach a managed PostgreSQL database. Configure these environment variables on the web service:
+
+```text
+DB_HOST=<Render PostgreSQL host>
+DB_PORT=5432
+DB_NAME=<database name>
+DB_USER=<database user>
+DB_PASSWORD=<database password>
+DB_SSLMODE=require
+WALLOS_SETUP_TOKEN=<random secret for initial SQL imports>
+```
+
+`DATABASE_URL` may be used instead of the `DB_*` variables. The container initializes and migrates PostgreSQL during startup and does not require a database volume or a writable `db/` directory. Uploaded logos and avatars remain local files under `images/uploads/logos`; they are included in application backups but will be lost after a Render redeploy unless that directory is backed by external storage.
 
 #### Docker
 

@@ -11,7 +11,7 @@ $apiKey = isset($_POST['api_key']) ? trim($_POST['api_key']) : '';
 // one for the reader to pick between.
 $removeOldCredentials = "DELETE FROM google_search WHERE user_id = :userId";
 $stmt = $db->prepare($removeOldCredentials);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute() === false) {
     die(json_encode([
@@ -49,8 +49,8 @@ if ($status !== 200 || isset($apiData['error'])) {
 
 $insertCredentials = "INSERT INTO google_search (api_key, user_id) VALUES (:api_key, :userId)";
 $stmt = $db->prepare($insertCredentials);
-$stmt->bindParam(':api_key', $apiKey, SQLITE3_TEXT);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':api_key', $apiKey, PDO::PARAM_STR);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

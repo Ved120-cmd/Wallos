@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "セットアップトークン",
     "restore_database_info" => "バックアップを復元するにはセットアップトークンが必要です。以下のいずれかの方法で取得してください：",
     "setup_token_docker" => "Docker: docker logs &lt;container-name&gt; を実行し、「Setup token for database restore」を探してください",
-    "setup_token_file" => "ベアメタル: サーバー上の db/setup_token.db ファイルを読み取ってください",
+    "setup_token_file" => "ベアメタル: サーバー上の the WALLOS_SETUP_TOKEN environment variable ファイルを読み取ってください",
     "select_backup_file" => "バックアップファイルを選択",
     // Login Page
     "please_login" => "ログインしてください",

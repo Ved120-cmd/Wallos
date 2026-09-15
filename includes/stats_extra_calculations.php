@@ -13,9 +13,9 @@ try {
 // Currency codes for the currency exposure split
 $currencyCodesById = [];
 $stmt = $db->prepare("SELECT id, code FROM currencies WHERE user_id = :userId");
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $currencyCodesById[$row['id']] = $row['code'];
 }
 

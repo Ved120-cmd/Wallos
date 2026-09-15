@@ -7,13 +7,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
         $subscriptionId = intval($_GET['id']);
         $query = "SELECT * FROM subscriptions WHERE id = :subscriptionId AND user_id = :userId";
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':subscriptionId', $subscriptionId, SQLITE3_INTEGER);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':subscriptionId', $subscriptionId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
 
         $subscriptionData = array();
 
-        if ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        if ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $subscriptionData['id'] = $subscriptionId;
             $subscriptionData['name'] = htmlspecialchars_decode($row['name'] ?? "");
             $subscriptionData['logo'] = $row['logo'];

@@ -10,9 +10,9 @@ function getPriceConverted($price, $currency, $database, $userId)
 // Get budget from user table
 $query = "SELECT budget FROM user WHERE id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 $budget = $row['budget'] ?? 0;
 
 $currentMonth = date('m');
@@ -51,10 +51,10 @@ $amountDueThisMonth = 0;
 
 $query = "SELECT * FROM subscriptions WHERE user_id = :user_id AND inactive = 0";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $subscriptions = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
   $subscriptions[] = $row;
   $currenciesInUse[] = $row['currency_id'];
 }
@@ -66,9 +66,9 @@ $showCantConverErrorMessage = false;
 if ($usesMultipleCurrencies) {
   $query = "SELECT api_key FROM fixer WHERE user_id = :userId";
   $stmt = $db->prepare($query);
-  $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+  $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
   $result = $stmt->execute();
-  if ($result->fetchArray(SQLITE3_ASSOC) === false) {
+  if ($result->fetchArray(PDO::FETCH_ASSOC) === false) {
     $showCantConverErrorMessage = true;
   }
 }
@@ -79,9 +79,9 @@ $query = "SELECT c.code
           INNER JOIN user u ON c.id = u.main_currency
           WHERE u.id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 $code = $row['code'];
 
 $yearsToLoad = $calendarYear - $currentYear + 1;

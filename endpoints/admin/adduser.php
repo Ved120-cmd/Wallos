@@ -119,8 +119,8 @@ if (empty($username) || empty($password) || empty($email)) {
 }
 
 $stmt = $db->prepare('SELECT COUNT(*) FROM user WHERE username = :username OR email = :email');
-$stmt->bindValue(':username', $username, SQLITE3_INTEGER);
-$stmt->bindValue(':email', $email, SQLITE3_TEXT);
+$stmt->bindValue(':username', $username, PDO::PARAM_INT);
+$stmt->bindValue(':email', $email, PDO::PARAM_STR);
 $result = $stmt->execute();
 $row = $result->fetchArray();
 // Error if user exist
@@ -133,7 +133,7 @@ if ($row[0] > 0) {
 
 // Get main currency and language from admin user
 $stmt = $db->prepare('SELECT main_currency, language FROM user WHERE id = :id');
-$stmt->bindValue(':id', $loggedInUserId, SQLITE3_TEXT);
+$stmt->bindValue(':id', $loggedInUserId, PDO::PARAM_STR);
 $result = $stmt->execute();
 $row = $result->fetchArray();
 $currency = $row['main_currency'] ?? 1;
@@ -142,21 +142,21 @@ $avatar = "images/avatars/0.svg";
 
 // Get code for main currency
 $stmt = $db->prepare('SELECT code FROM currencies WHERE id = :id');
-$stmt->bindValue(':id', $currency, SQLITE3_TEXT);
+$stmt->bindValue(':id', $currency, PDO::PARAM_STR);
 $row = $stmt->execute();
 $main_currency = $row->fetchArray()['code'];
 
 $query = "INSERT INTO user (username, email, password, main_currency, avatar, language, budget, api_key) VALUES (:username, :email, :password, :main_currency, :avatar, :language, :budget, :api_key)";
 $stmt = $db->prepare($query);
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-$stmt->bindValue(':username', $username, SQLITE3_TEXT);
-$stmt->bindValue(':email', $email, SQLITE3_TEXT);
-$stmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
-$stmt->bindValue(':main_currency', 1, SQLITE3_TEXT);
-$stmt->bindValue(':avatar', $avatar, SQLITE3_TEXT);
-$stmt->bindValue(':language', $language, SQLITE3_TEXT);
-$stmt->bindValue(':budget', 0, SQLITE3_INTEGER);
-$stmt->bindValue(':api_key', bin2hex(random_bytes(32)), SQLITE3_TEXT);
+$stmt->bindValue(':username', $username, PDO::PARAM_STR);
+$stmt->bindValue(':email', $email, PDO::PARAM_STR);
+$stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+$stmt->bindValue(':main_currency', 1, PDO::PARAM_STR);
+$stmt->bindValue(':avatar', $avatar, PDO::PARAM_STR);
+$stmt->bindValue(':language', $language, PDO::PARAM_STR);
+$stmt->bindValue(':budget', 0, PDO::PARAM_INT);
+$stmt->bindValue(':api_key', bin2hex(random_bytes(32)), PDO::PARAM_STR);
 $result = $stmt->execute();
 
 if ($result) {
@@ -167,8 +167,8 @@ if ($result) {
     // Add username as household member for that user
     $query = "INSERT INTO household (name, user_id) VALUES (:name, :user_id)";
     $stmt = $db->prepare($query);
-    $stmt->bindValue(':name', $username, SQLITE3_TEXT);
-    $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+    $stmt->bindValue(':name', $username, PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
     $stmt->execute();
 
     if ($newUserId > 1) {
@@ -177,9 +177,9 @@ if ($result) {
         $query = 'INSERT INTO categories (name, "order", user_id) VALUES (:name, :order, :user_id)';
         $stmt = $db->prepare($query);
         foreach ($categories as $index => $category) {
-            $stmt->bindValue(':name', $category['name'], SQLITE3_TEXT);
-            $stmt->bindValue(':order', $index + 1, SQLITE3_INTEGER);
-            $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+            $stmt->bindValue(':name', $category['name'], PDO::PARAM_STR);
+            $stmt->bindValue(':order', $index + 1, PDO::PARAM_INT);
+            $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
             $stmt->execute();
         }
 
@@ -187,10 +187,10 @@ if ($result) {
         $query = 'INSERT INTO payment_methods (name, icon, "order", user_id) VALUES (:name, :icon, :order, :user_id)';
         $stmt = $db->prepare($query);
         foreach ($payment_methods as $index => $payment_method) {
-            $stmt->bindValue(':name', $payment_method['name'], SQLITE3_TEXT);
-            $stmt->bindValue(':icon', $payment_method['icon'], SQLITE3_TEXT);
-            $stmt->bindValue(':order', $index + 1, SQLITE3_INTEGER);
-            $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+            $stmt->bindValue(':name', $payment_method['name'], PDO::PARAM_STR);
+            $stmt->bindValue(':icon', $payment_method['icon'], PDO::PARAM_STR);
+            $stmt->bindValue(':order', $index + 1, PDO::PARAM_INT);
+            $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
             $stmt->execute();
         }
 
@@ -198,41 +198,41 @@ if ($result) {
         $query = "INSERT INTO currencies (name, symbol, code, rate, user_id) VALUES (:name, :symbol, :code, :rate, :user_id)";
         $stmt = $db->prepare($query);
         foreach ($currencies as $currency) {
-            $stmt->bindValue(':name', $currency['name'], SQLITE3_TEXT);
-            $stmt->bindValue(':symbol', $currency['symbol'], SQLITE3_TEXT);
-            $stmt->bindValue(':code', $currency['code'], SQLITE3_TEXT);
-            $stmt->bindValue(':rate', 1, SQLITE3_FLOAT);
-            $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+            $stmt->bindValue(':name', $currency['name'], PDO::PARAM_STR);
+            $stmt->bindValue(':symbol', $currency['symbol'], PDO::PARAM_STR);
+            $stmt->bindValue(':code', $currency['code'], PDO::PARAM_STR);
+            $stmt->bindValue(':rate', 1, PDO::PARAM_STR);
+            $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
             $stmt->execute();
         }
 
         // Retrieve main currency id
         $query = "SELECT id FROM currencies WHERE code = :code AND user_id = :user_id";
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':code', $main_currency, SQLITE3_TEXT);
-        $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+        $stmt->bindValue(':code', $main_currency, PDO::PARAM_STR);
+        $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        $currency = $result->fetchArray(SQLITE3_ASSOC);
+        $currency = $result->fetchArray(PDO::FETCH_ASSOC);
 
         // Update user main currency
         $query = "UPDATE user SET main_currency = :main_currency WHERE id = :user_id";
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':main_currency', $currency['id'], SQLITE3_INTEGER);
-        $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+        $stmt->bindValue(':main_currency', $currency['id'], PDO::PARAM_INT);
+        $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
         $stmt->execute();
 
         // Add settings for that user
         $query = "INSERT INTO settings (dark_theme, monthly_price, convert_currency, remove_background, color_theme, hide_disabled, user_id, disabled_to_bottom, show_original_price, mobile_nav, week_starts_sunday) 
                 VALUES (2, 0, 0, 0, 'blue', 0, :user_id, 0, 0, 0, 0)";
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+        $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
         $stmt->execute();
 
         // If email verification is required add the user to the email_verification table
         $query = "SELECT * FROM admin";
         $stmt = $db->prepare($query);
         $result = $stmt->execute();
-        $settings = $result->fetchArray(SQLITE3_ASSOC);
+        $settings = $result->fetchArray(PDO::FETCH_ASSOC);
     }
 
     $db->close();

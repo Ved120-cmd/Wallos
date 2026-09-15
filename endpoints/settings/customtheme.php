@@ -30,7 +30,7 @@ if ($main_color == $accent_color) {
 // mean the colors the user just chose are one of two answers to the same
 // question, and nothing decides which one the next page load gets.
 $stmt = $db->prepare('DELETE FROM custom_colors WHERE user_id = :userId');
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute() === false) {
     die(json_encode([
@@ -40,10 +40,10 @@ if ($stmt->execute() === false) {
 }
 
 $stmt = $db->prepare('INSERT INTO custom_colors (main_color, accent_color, hover_color, user_id) VALUES (:main_color, :accent_color, :hover_color, :userId)');
-$stmt->bindParam(':main_color', $main_color, SQLITE3_TEXT);
-$stmt->bindParam(':accent_color', $accent_color, SQLITE3_TEXT);
-$stmt->bindParam(':hover_color', $hover_color, SQLITE3_TEXT);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':main_color', $main_color, PDO::PARAM_STR);
+$stmt->bindParam(':accent_color', $accent_color, PDO::PARAM_STR);
+$stmt->bindParam(':hover_color', $hover_color, PDO::PARAM_STR);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

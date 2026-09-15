@@ -393,9 +393,9 @@ function printSubscriptions($subscriptions, $sort, $categories, $members, $i18n,
 
 $query = "SELECT main_currency FROM user WHERE id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 if ($row !== false) {
     $mainCurrencyId = $row['main_currency'];
 } else {

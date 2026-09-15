@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Token de configurare",
     "restore_database_info" => "Este necesar un token de configurare pentru a restaura o copie de rezervă. Recuperați-l folosind una dintre metodele de mai jos:",
     "setup_token_docker" => "Docker: rulați docker logs &lt;container-name&gt; și căutați \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: citiți fișierul db/setup_token.db de pe server",
+    "setup_token_file" => "Bare metal: citiți fișierul the WALLOS_SETUP_TOKEN environment variable de pe server",
     "select_backup_file" => "Selectați fișierul de rezervă",
     // Login Page
     "please_login" => "Conectează-te",

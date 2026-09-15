@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Token konfiguracyjny",
     "restore_database_info" => "Do przywrócenia kopii zapasowej wymagany jest token konfiguracyjny. Pobierz go jedną z poniższych metod:",
     "setup_token_docker" => "Docker: uruchom docker logs &lt;container-name&gt; i wyszukaj \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: odczytaj plik db/setup_token.db na serwerze",
+    "setup_token_file" => "Bare metal: odczytaj plik the WALLOS_SETUP_TOKEN environment variable na serwerze",
     "select_backup_file" => "Wybierz plik kopii zapasowej",
     // Login Page
     "please_login" => "Proszę się zalogować",

@@ -9,7 +9,7 @@
   saying why.
 
   The check already existed in the manual endpoint and could not run: it built a
-  DateTime out of the SQLite3Result rather than out of a value fetched from it,
+  DateTime out of the PDOStatement rather than out of a value fetched from it,
   which on PHP 8 is a TypeError. Nothing reached it because the interface only
   ever posts force=true, so the defect sat behind a branch nobody took.
 */
@@ -17,15 +17,15 @@
 require_once WALLOS_ROOT . '/includes/exchange_rate_freshness.php';
 
 /**
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @param string  $date
  */
 function freshness_record($db, $userId, $date)
 {
     $statement = $db->prepare('INSERT INTO last_exchange_update (date, user_id) VALUES (:date, :userId)');
-    $statement->bindValue(':date', $date, SQLITE3_TEXT);
-    $statement->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $statement->bindValue(':date', $date, PDO::PARAM_STR);
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
     $statement->execute();
 }
 

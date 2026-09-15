@@ -40,9 +40,9 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         $main_currency = $_SESSION['main_currency'];
         $sql = "SELECT * FROM user WHERE username = :username";
         $stmt = $db->prepare($sql);
-        $stmt->bindValue(':username', $username, SQLITE3_TEXT);
+        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
         $result = $stmt->execute();
-        $userData = $result->fetchArray(SQLITE3_ASSOC);
+        $userData = $result->fetchArray(PDO::FETCH_ASSOC);
         $userId = $userData['id'];
 
         if ($userData === false) {

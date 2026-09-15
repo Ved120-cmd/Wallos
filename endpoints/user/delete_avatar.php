@@ -10,10 +10,10 @@ if (isset($input['avatar'])) {
     $avatarPath = "images/uploads/logos/avatars/" . $avatar;
 
     $stmt = $db->prepare("SELECT id FROM uploaded_avatars WHERE user_id = :userId AND path = :path");
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
-    $stmt->bindValue(':path', $avatarPath, SQLITE3_TEXT);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':path', $avatarPath, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $ownership = $result->fetchArray(SQLITE3_ASSOC);
+    $ownership = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if (!$ownership) {
         echo json_encode([
@@ -38,9 +38,9 @@ if (isset($input['avatar'])) {
 
     $sql = "SELECT avatar FROM user WHERE id = :userId";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
-    $userAvatar = $result->fetchArray(SQLITE3_ASSOC)['avatar'];
+    $userAvatar = $result->fetchArray(PDO::FETCH_ASSOC)['avatar'];
 
     // Check if $avatarPath matches the avatar in the user table
     if ($avatarPath === $userAvatar) {
@@ -49,7 +49,7 @@ if (isset($input['avatar'])) {
         if (file_exists($filePath)) {
             unlink($filePath);
             $delStmt = $db->prepare("DELETE FROM uploaded_avatars WHERE id = :id");
-            $delStmt->bindValue(':id', $ownership['id'], SQLITE3_INTEGER);
+            $delStmt->bindValue(':id', $ownership['id'], PDO::PARAM_INT);
             $delStmt->execute();
             echo json_encode(array("success" => true, "message" => translate("success", $i18n)));
         } else {

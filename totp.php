@@ -57,9 +57,9 @@ if (isset($_POST['one-time-code'])) {
     $totpLockoutSeconds = 30;
 
     $statement = $db->prepare('SELECT totp_secret, backup_codes, failed_attempts, lockout_until, last_totp_used FROM totp WHERE user_id = :id');
-    $statement->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+    $statement->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
     $result = $statement->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $totp_secret = $row['totp_secret'];
     $backupCodes = json_decode($row['backup_codes'], true);
     $failedAttempts = (int) ($row['failed_attempts'] ?? 0);
@@ -134,8 +134,8 @@ if (isset($_POST['one-time-code'])) {
                 $backupCodes = array_values($backupCodes);
 
                 $statement = $db->prepare('UPDATE totp SET backup_codes = :backup_codes WHERE user_id = :id');
-                $statement->bindValue(':backup_codes', json_encode($backupCodes), SQLITE3_TEXT);
-                $statement->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+                $statement->bindValue(':backup_codes', json_encode($backupCodes), PDO::PARAM_STR);
+                $statement->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
 
                 // A backup code is single-use, so it counts only once it has
                 // actually been struck off. Honouring one whose removal failed
@@ -145,8 +145,8 @@ if (isset($_POST['one-time-code'])) {
         } else {
             // Record the matched time-step so the same code cannot be reused.
             $statement = $db->prepare('UPDATE totp SET last_totp_used = :last_totp_used WHERE user_id = :id');
-            $statement->bindValue(':last_totp_used', $matchedStep, SQLITE3_INTEGER);
-            $statement->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+            $statement->bindValue(':last_totp_used', $matchedStep, PDO::PARAM_INT);
+            $statement->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
 
             // The login still proceeds if this cannot be stored — the code was
             // genuine — but the replay window is then unguarded, so say so.
@@ -159,7 +159,7 @@ if (isset($_POST['one-time-code'])) {
         // Update brute-force counters based on the result of this attempt.
         if ($valid) {
             $counterStmt = $db->prepare('UPDATE totp SET failed_attempts = 0, lockout_until = 0 WHERE user_id = :id');
-            $counterStmt->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+            $counterStmt->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
             $counterStmt->execute();
         } else {
             $invalidTotp = true;
@@ -169,14 +169,14 @@ if (isset($_POST['one-time-code'])) {
                 // Trip the lockout and reset the counter so a fresh window
                 // begins once the lockout expires.
                 $counterStmt = $db->prepare('UPDATE totp SET failed_attempts = 0, lockout_until = :lockout WHERE user_id = :id');
-                $counterStmt->bindValue(':lockout', time() + $totpLockoutSeconds, SQLITE3_INTEGER);
-                $counterStmt->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+                $counterStmt->bindValue(':lockout', time() + $totpLockoutSeconds, PDO::PARAM_INT);
+                $counterStmt->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
                 $counterStmt->execute();
                 $totpLocked = true;
             } else {
                 $counterStmt = $db->prepare('UPDATE totp SET failed_attempts = :attempts WHERE user_id = :id');
-                $counterStmt->bindValue(':attempts', $failedAttempts, SQLITE3_INTEGER);
-                $counterStmt->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+                $counterStmt->bindValue(':attempts', $failedAttempts, PDO::PARAM_INT);
+                $counterStmt->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
                 $counterStmt->execute();
             }
         }
@@ -185,9 +185,9 @@ if (isset($_POST['one-time-code'])) {
     if ($valid) {
         $query = "SELECT id, username, main_currency, language FROM user WHERE id = :id";
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+        $stmt->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
         $result = $stmt->execute();
-        $user = $result->fetchArray(SQLITE3_ASSOC);
+        $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
         session_regenerate_id(true);
         $_SESSION['username'] = $user['username'];
@@ -199,8 +199,8 @@ if (isset($_POST['one-time-code'])) {
             $token = bin2hex(random_bytes(32));
             $addLoginTokens = "INSERT INTO login_tokens (user_id, token) VALUES (:userId, :token)";
             $addLoginTokensStmt = $db->prepare($addLoginTokens);
-            $addLoginTokensStmt->bindParam(':userId', $user['id'], SQLITE3_INTEGER);
-            $addLoginTokensStmt->bindParam(':token', $token, SQLITE3_TEXT);
+            $addLoginTokensStmt->bindParam(':userId', $user['id'], PDO::PARAM_INT);
+            $addLoginTokensStmt->bindParam(':token', $token, PDO::PARAM_STR);
             $addLoginTokensStmt->execute();
             $_SESSION['token'] = $token;
             $cookieExpire = time() + (30 * 24 * 60 * 60);
@@ -227,9 +227,9 @@ if (isset($_POST['one-time-code'])) {
 
         $query = "SELECT color_theme FROM settings WHERE user_id = :id";
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':id', $_SESSION['totp_user_id'], SQLITE3_INTEGER);
+        $stmt->bindValue(':id', $_SESSION['totp_user_id'], PDO::PARAM_INT);
         $result = $stmt->execute();
-        $settings = $result->fetchArray(SQLITE3_ASSOC);
+        $settings = $result->fetchArray(PDO::FETCH_ASSOC);
         setcookie('colorTheme', $settings['color_theme'], [
             'expires' => $cookieExpire,
             'samesite' => 'Lax'

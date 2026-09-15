@@ -17,7 +17,7 @@ if (!isset($data["sendkey"]) || $data["sendkey"] == "") {
 
     $query = "SELECT COUNT(*) FROM serverchan_notifications WHERE user_id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result === false) {
@@ -38,9 +38,9 @@ if (!isset($data["sendkey"]) || $data["sendkey"] == "") {
         }
 
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':enabled', $enabled, SQLITE3_INTEGER);
-        $stmt->bindValue(':sendkey', $sendkey, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':enabled', $enabled, PDO::PARAM_INT);
+        $stmt->bindValue(':sendkey', $sendkey, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
             $response = [

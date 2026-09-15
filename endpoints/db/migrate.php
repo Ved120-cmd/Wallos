@@ -6,7 +6,7 @@ function errorHandler($severity, $message, $file, $line)
 
 // Set the custom error handler
 set_error_handler('errorHandler');
-/** @var \SQLite3 $db */
+/** @var \WallosDatabase $db */
 try {
     require_once 'includes/connect_endpoint_crontabs.php';
 } catch (Exception $e) {

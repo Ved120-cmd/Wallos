@@ -14,27 +14,27 @@ $binds = [];
 if (isset($data['budget']) && !isset($data['monthly_budget'])) {
     $legacyBudget = max(0, (float) $data['budget']);
     $sets[] = 'budget = :legacyBudget';
-    $binds[':legacyBudget'] = ['value' => $legacyBudget, 'type' => SQLITE3_FLOAT];
+    $binds[':legacyBudget'] = ['value' => $legacyBudget, 'type' => PDO::PARAM_STR];
 }
 
 if (isset($data['monthly_budget'])) {
     $monthlyBudget = max(0, (float) $data['monthly_budget']);
     $sets[] = 'budget = :monthlyBudget';
-    $binds[':monthlyBudget'] = ['value' => $monthlyBudget, 'type' => SQLITE3_FLOAT];
+    $binds[':monthlyBudget'] = ['value' => $monthlyBudget, 'type' => PDO::PARAM_STR];
 }
 
 if (isset($data['period_budget'])) {
     $periodBudget = max(0, (float) $data['period_budget']);
     $sets[] = 'period_budget = :periodBudget';
-    $binds[':periodBudget'] = ['value' => $periodBudget, 'type' => SQLITE3_FLOAT];
+    $binds[':periodBudget'] = ['value' => $periodBudget, 'type' => PDO::PARAM_STR];
 
     $periodType = sanitizeBudgetPeriodType($data['budget_period_type'] ?? 'monthly');
     $anchorDate = sanitizeBudgetAnchorDate($data['budget_period_anchor_date'] ?? getDefaultBudgetAnchorDate());
 
     $sets[] = 'budget_period_type = :periodType';
-    $binds[':periodType'] = ['value' => $periodType, 'type' => SQLITE3_TEXT];
+    $binds[':periodType'] = ['value' => $periodType, 'type' => PDO::PARAM_STR];
     $sets[] = 'budget_period_anchor_date = :anchorDate';
-    $binds[':anchorDate'] = ['value' => $anchorDate, 'type' => SQLITE3_TEXT];
+    $binds[':anchorDate'] = ['value' => $anchorDate, 'type' => PDO::PARAM_STR];
 }
 
 if (empty($sets)) {
@@ -47,7 +47,7 @@ $stmt = $db->prepare($sql);
 foreach ($binds as $key => $bind) {
     $stmt->bindValue($key, $bind['value'], $bind['type']);
 }
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result) {

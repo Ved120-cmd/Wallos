@@ -12,8 +12,8 @@ if (!isset($_POST['paymentId']) || !isset($_POST['enabled'])) {
 $paymentId = $_POST['paymentId'];
 
 $stmt = $db->prepare('SELECT COUNT(*) as count FROM subscriptions WHERE payment_method_id=:paymentId and user_id=:userId');
-$stmt->bindValue(':paymentId', $paymentId, SQLITE3_INTEGER);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':paymentId', $paymentId, PDO::PARAM_INT);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $row = $result->fetchArray();
 $inUse = $row['count'] > 0;

@@ -34,7 +34,7 @@ if (!isset($data["webhook_url"]) || $data["webhook_url"] == "") {
 
     $query = "SELECT COUNT(*) FROM mattermost_notifications WHERE user_id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result === false) {
@@ -55,11 +55,11 @@ if (!isset($data["webhook_url"]) || $data["webhook_url"] == "") {
         }
 
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':enabled', $enabled, SQLITE3_INTEGER);
-        $stmt->bindValue(':webhook_url', $webhook_url, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
-        $stmt->bindValue(':bot_username', $bot_username, SQLITE3_TEXT);
-        $stmt->bindValue(':bot_icon_emoji', $bot_iconemoji, SQLITE3_TEXT);
+        $stmt->bindValue(':enabled', $enabled, PDO::PARAM_INT);
+        $stmt->bindValue(':webhook_url', $webhook_url, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':bot_username', $bot_username, PDO::PARAM_STR);
+        $stmt->bindValue(':bot_icon_emoji', $bot_iconemoji, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
             $response = [

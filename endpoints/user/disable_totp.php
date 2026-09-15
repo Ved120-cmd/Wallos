@@ -13,22 +13,22 @@ require_once '../../includes/validate_endpoint.php';
  * call sites below reported success unconditionally, so a user in that state
  * had just been told 2FA was switched off.
  *
- * SQLite3 has no beginTransaction(), so the transaction is run as statements.
+ * Keep the flag and enrolment row changes atomic.
  *
- * @param  SQLite3 $db
+ * @param  WallosDatabase $db
  * @param  int     $userId
  * @return bool false when nothing was changed
  */
 function wallos_disable_totp($db, $userId)
 {
-    if ($db->exec('BEGIN') === false) {
+    if ($db->beginTransaction() === false) {
         return false;
     }
 
     $statement = $db->prepare('UPDATE user SET totp_enabled = 0 WHERE id = :id');
     $ok = $statement !== false;
     if ($ok) {
-        $statement->bindValue(':id', $userId, SQLITE3_INTEGER);
+        $statement->bindValue(':id', $userId, PDO::PARAM_INT);
         $ok = $statement->execute() !== false;
     }
 
@@ -36,13 +36,13 @@ function wallos_disable_totp($db, $userId)
         $statement = $db->prepare('DELETE FROM totp WHERE user_id = :id');
         $ok = $statement !== false;
         if ($ok) {
-            $statement->bindValue(':id', $userId, SQLITE3_INTEGER);
+            $statement->bindValue(':id', $userId, PDO::PARAM_INT);
             $ok = $statement->execute() !== false;
         }
     }
 
-    if (!$ok || $db->exec('COMMIT') === false) {
-        $db->exec('ROLLBACK');
+    if (!$ok || $db->commit() === false) {
+        $db->rollBack();
 
         return false;
     }
@@ -60,9 +60,9 @@ if (!function_exists('trigger_deprecation')) {
 }
 
 $statement = $db->prepare('SELECT totp_enabled FROM user WHERE id = :id');
-$statement->bindValue(':id', $userId, SQLITE3_INTEGER);
+$statement->bindValue(':id', $userId, PDO::PARAM_INT);
 $result = $statement->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($row['totp_enabled'] == 0) {
     die(json_encode([
@@ -92,15 +92,15 @@ if (isset($data['totpCode']) && $data['totpCode'] != "") {
     $totp_code = $data['totpCode'];
 
     $statement = $db->prepare('SELECT totp_secret FROM totp WHERE user_id = :id');
-    $statement->bindValue(':id', $userId, SQLITE3_INTEGER);
+    $statement->bindValue(':id', $userId, PDO::PARAM_INT);
     $result = $statement->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $secret = $row['totp_secret'];
 
     $statement = $db->prepare('SELECT backup_codes FROM totp WHERE user_id = :id');
-    $statement->bindValue(':id', $userId, SQLITE3_INTEGER);
+    $statement->bindValue(':id', $userId, PDO::PARAM_INT);
     $result = $statement->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $backupCodes = $row['backup_codes'];
 
     $clock = new OTPHP\InternalClock();

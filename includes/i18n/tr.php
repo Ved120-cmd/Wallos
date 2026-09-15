@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Kurulum belirteci",
     "restore_database_info" => "Bir yedeklemeyi geri yüklemek için kurulum belirteci gereklidir. Aşağıdaki yöntemlerden biriyle alın:",
     "setup_token_docker" => "Docker: docker logs &lt;container-name&gt; komutunu çalıştırın ve \"Setup token for database restore\" ifadesini arayın",
-    "setup_token_file" => "Bare metal: sunucudaki db/setup_token.db dosyasını okuyun",
+    "setup_token_file" => "Bare metal: sunucudaki the WALLOS_SETUP_TOKEN environment variable dosyasını okuyun",
     "select_backup_file" => "Yedek dosyası seç",
     // Login Page
     "please_login" => "Lütfen giriş yapın",

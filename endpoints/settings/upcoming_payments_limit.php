@@ -16,8 +16,8 @@ if ($limit === null) {
 }
 
 $stmt = $db->prepare('UPDATE settings SET upcoming_payments_limit = :limit WHERE user_id = :userId');
-$stmt->bindValue(':limit', $limit, SQLITE3_INTEGER);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

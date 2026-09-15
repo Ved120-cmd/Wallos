@@ -66,7 +66,7 @@ if ($dbSettings['user_info_url'] && validate_oidc_endpoint_url($dbSettings['user
 
 $checkStmt = $db->prepare('SELECT COUNT(*) as count FROM oauth_settings WHERE id = 1');
 $result = $checkStmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($row['count'] > 0) {
     // Update existing row
@@ -95,20 +95,20 @@ if ($row['count'] > 0) {
         )');
 }
 
-$stmt->bindValue(':oidcName', $dbSettings['name'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcClientId', $dbSettings['client_id'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcClientSecret', $dbSettings['client_secret'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcAuthUrl', $dbSettings['authorization_url'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcTokenUrl', $dbSettings['token_url'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcUserInfoUrl', $dbSettings['user_info_url'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcRedirectUrl', $dbSettings['redirect_url'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcLogoutUrl', $dbSettings['logout_url'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcUserIdentifierField', $dbSettings['user_identifier_field'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcScopes', $dbSettings['scopes'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcAuthStyle', $dbSettings['auth_style'], SQLITE3_TEXT);
-$stmt->bindValue(':oidcAutoCreateUser', $dbSettings['auto_create_user'], SQLITE3_INTEGER);
-$stmt->bindValue(':oidcPasswordLoginDisabled', $dbSettings['password_login_disabled'], SQLITE3_INTEGER);
-$stmt->bindValue(':oidcRequireEmailVerified', $dbSettings['require_email_verified'], SQLITE3_INTEGER);
+$stmt->bindValue(':oidcName', $dbSettings['name'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcClientId', $dbSettings['client_id'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcClientSecret', $dbSettings['client_secret'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcAuthUrl', $dbSettings['authorization_url'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcTokenUrl', $dbSettings['token_url'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcUserInfoUrl', $dbSettings['user_info_url'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcRedirectUrl', $dbSettings['redirect_url'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcLogoutUrl', $dbSettings['logout_url'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcUserIdentifierField', $dbSettings['user_identifier_field'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcScopes', $dbSettings['scopes'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcAuthStyle', $dbSettings['auth_style'], PDO::PARAM_STR);
+$stmt->bindValue(':oidcAutoCreateUser', $dbSettings['auto_create_user'], PDO::PARAM_INT);
+$stmt->bindValue(':oidcPasswordLoginDisabled', $dbSettings['password_login_disabled'], PDO::PARAM_INT);
+$stmt->bindValue(':oidcRequireEmailVerified', $dbSettings['require_email_verified'], PDO::PARAM_INT);
 $stmt->execute();
 
 if ($db->changes() > 0) {

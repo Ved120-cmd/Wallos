@@ -1,12 +1,11 @@
 <?php
 
-$databaseFile = 'db/wallos.db';
+require_once __DIR__ . '/database.php';
 
-$db = new SQLite3($databaseFile);
-$db->busyTimeout(5000);
-
-if (!$db) {
-    die('Connection to the database failed.');
+try {
+    $db = new WallosDatabase();
+} catch (Throwable $exception) {
+    die('Connection to the PostgreSQL database failed: ' . $exception->getMessage());
 }
 
 ?>

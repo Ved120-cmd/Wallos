@@ -32,6 +32,39 @@ function addFolderToZip($dir, $zipArchive, $zipdir = '')
     }
 }
 
+function createPostgresDump(WallosDatabase $db): string
+{
+    $config = $db->getConnectionConfig();
+    $dumpPath = tempnam(sys_get_temp_dir(), 'wallos_dump_');
+    if ($dumpPath === false) {
+        throw new RuntimeException('Unable to create PostgreSQL dump file.');
+    }
+
+    $arguments = [
+        'pg_dump', '--format=plain', '--no-owner', '--no-privileges',
+        '--file', $dumpPath, '--host', $config['host'], '--port', (string) $config['port'],
+        '--username', $config['user'], $config['name'],
+    ];
+    $command = implode(' ', array_map('escapeshellarg', $arguments));
+    $environment = ['PGPASSWORD' => $config['password']];
+    $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $environment);
+    if (!is_resource($process)) {
+        @unlink($dumpPath);
+        throw new RuntimeException('Unable to start pg_dump.');
+    }
+
+    $error = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $status = proc_close($process);
+    if ($status !== 0) {
+        @unlink($dumpPath);
+        throw new RuntimeException('PostgreSQL backup failed: ' . trim($error));
+    }
+
+    return $dumpPath;
+}
+
 // Build the archive OUTSIDE the web root. Previously it was written to
 // ../../.tmp/ with a uniqid()-based name and served statically by nginx, which
 // let anyone who could guess the (timestamp-derived, low-entropy) filename
@@ -46,6 +79,7 @@ if ($zipname === false) {
     ]));
 }
 
+$dumpPath = null;
 $zip = new ZipArchive();
 if ($zip->open($zipname, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
     @unlink($zipname);
@@ -55,7 +89,17 @@ if ($zip->open($zipname, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
     ]));
 }
 
-addFolderToZip('../../db/', $zip);
+try {
+    $dumpPath = createPostgresDump($db);
+    $zip->addFile($dumpPath, 'wallos.sql');
+} catch (Throwable $exception) {
+    $zip->close();
+    @unlink($zipname);
+    die(json_encode([
+        "success" => false,
+        "message" => $exception->getMessage()
+    ]));
+}
 addFolderToZip('../../images/uploads/', $zip);
 
 if ($zip->close() === false) {
@@ -84,4 +128,7 @@ header('Cache-Control: no-store');
 
 readfile($zipname);
 unlink($zipname);
+if ($dumpPath !== null) {
+    unlink($dumpPath);
+}
 exit;

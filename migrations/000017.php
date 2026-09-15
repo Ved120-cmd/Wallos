@@ -5,13 +5,13 @@
 */
 
 $db->exec("CREATE TABLE IF NOT EXISTS pushover_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     user_key TEXT DEFAULT '',
     token TEXT DEFAULT ''
 )");
 
 $db->exec("CREATE TABLE IF NOT EXISTS discord_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     webhook_url TEXT DEFAULT '',
     bot_username TEXT DEFAULT '',
     bot_avatar_url TEXT DEFAULT ''

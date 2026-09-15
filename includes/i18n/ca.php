@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Token de configuració",
     "restore_database_info" => "Cal un token de configuració per restaurar una còpia de seguretat. Obteniu-lo mitjançant un dels mètodes següents:",
     "setup_token_docker" => "Docker: executeu docker logs &lt;container-name&gt; i busqueu \"Setup token for database restore\"",
-    "setup_token_file" => "Instal·lació local: llegiu el fitxer db/setup_token.db al servidor",
+    "setup_token_file" => "Instal·lació local: llegiu el fitxer the WALLOS_SETUP_TOKEN environment variable al servidor",
     "select_backup_file" => "Selecciona el fitxer de còpia de seguretat",
     // Login Page
     "please_login" => "Si us plau, inicia sessió",

@@ -17,14 +17,14 @@ if (!isset($data["days"]) || $data['days'] == "") {
     $periodSummaryAtPeriodStart = isset($data["period_summary_at_period_start"]) ? (int) $data["period_summary_at_period_start"] : 0;
 
     $hasPeriodSummaryColumn = false;
-    $columnResult = $db->query("SELECT * FROM pragma_table_info('notification_settings') WHERE name='period_summary_at_period_start'");
-    if ($columnResult && $columnResult->fetchArray(SQLITE3_ASSOC)) {
+    $columnResult = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+    if ($columnResult && $columnResult->fetchArray(PDO::FETCH_ASSOC)) {
         $hasPeriodSummaryColumn = true;
     }
 
     $query = "SELECT COUNT(*) FROM notification_settings WHERE user_id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result === false) {
@@ -55,11 +55,11 @@ if (!isset($data["days"]) || $data['days'] == "") {
         }
 
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':days', $days, SQLITE3_INTEGER);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
         if ($hasPeriodSummaryColumn) {
-            $stmt->bindValue(':periodSummaryAtPeriodStart', $periodSummaryAtPeriodStart, SQLITE3_INTEGER);
+            $stmt->bindValue(':periodSummaryAtPeriodStart', $periodSummaryAtPeriodStart, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
             $response = [

@@ -12,7 +12,7 @@ $provider = isset($_POST["provider"]) ? $_POST["provider"] : 0;
 // the usage of one row while the cron job spends the quota of the other.
 $removeOldKey = "DELETE FROM fixer WHERE user_id = :userId";
 $stmt = $db->prepare($removeOldKey);
-$stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+$stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
 
 if ($stmt->execute() === false) {
     echo json_encode([
@@ -54,18 +54,18 @@ if ($apiData['success'] && $apiData['success'] == 1) {
     if (!empty($newApiKey)) {
         $insertNewKey = "INSERT INTO fixer (api_key, provider, user_id) VALUES (:api_key, :provider, :userId)";
         $stmt = $db->prepare($insertNewKey);
-        $stmt->bindParam(":api_key", $newApiKey, SQLITE3_TEXT);
-        $stmt->bindParam(":provider", $provider, SQLITE3_INTEGER);
-        $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(":api_key", $newApiKey, PDO::PARAM_STR);
+        $stmt->bindParam(":provider", $provider, PDO::PARAM_INT);
+        $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
         if ($result) {
             if ($usageLimit !== null && $usageRemaining !== null
-                && $db->querySingle("SELECT COUNT(*) FROM pragma_table_info('fixer') WHERE name='usage_used'") > 0) {
+                && $db->querySingle("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'fixer' AND column_name = 'usage_used'") > 0) {
                 $usageStmt = $db->prepare("UPDATE fixer SET usage_used = :used, usage_limit = :limit, usage_updated_at = :updatedAt WHERE user_id = :userId");
-                $usageStmt->bindValue(':used', $usageLimit - $usageRemaining, SQLITE3_INTEGER);
-                $usageStmt->bindValue(':limit', $usageLimit, SQLITE3_INTEGER);
-                $usageStmt->bindValue(':updatedAt', date('Y-m-d H:i:s'), SQLITE3_TEXT);
-                $usageStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+                $usageStmt->bindValue(':used', $usageLimit - $usageRemaining, PDO::PARAM_INT);
+                $usageStmt->bindValue(':limit', $usageLimit, PDO::PARAM_INT);
+                $usageStmt->bindValue(':updatedAt', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+                $usageStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
                 $usageStmt->execute();
             }
             echo json_encode(["success" => true, "message" => translate('api_key_saved', $i18n)]);

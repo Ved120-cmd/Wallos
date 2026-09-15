@@ -67,14 +67,14 @@ function wallos_get_db_oidc_settings($db)
 
     $stmt = $db->prepare('SELECT * FROM oauth_settings WHERE id = 1');
     $result = $stmt->execute();
-    $row = $result ? $result->fetchArray(SQLITE3_ASSOC) : false;
+    $row = $result ? $result->fetchArray(PDO::FETCH_ASSOC) : false;
 
     if ($row) {
         unset($row['id']);
         $settings = array_merge($settings, $row);
     }
 
-    // Column added via ALTER TABLE may return NULL for existing rows in SQLite
+    // Column added via ALTER TABLE may return NULL for existing rows.
     $settings['require_email_verified'] = $settings['require_email_verified'] ?? 1;
 
     return $settings;
@@ -84,7 +84,7 @@ function wallos_get_db_oidc_enabled($db)
 {
     $stmt = $db->prepare('SELECT oidc_oauth_enabled FROM admin WHERE id = 1');
     $result = $stmt->execute();
-    $row = $result ? $result->fetchArray(SQLITE3_ASSOC) : false;
+    $row = $result ? $result->fetchArray(PDO::FETCH_ASSOC) : false;
 
     return $row ? (int) $row['oidc_oauth_enabled'] : 0;
 }

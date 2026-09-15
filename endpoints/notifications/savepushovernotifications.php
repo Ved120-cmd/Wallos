@@ -23,7 +23,7 @@ if (
 
     $query = "SELECT COUNT(*) FROM pushover_notifications WHERE user_id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result === false) {
@@ -44,10 +44,10 @@ if (
         }
 
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':enabled', $enabled, SQLITE3_INTEGER);
-        $stmt->bindValue(':user_key', $user_key, SQLITE3_TEXT);
-        $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':enabled', $enabled, PDO::PARAM_INT);
+        $stmt->bindValue(':user_key', $user_key, PDO::PARAM_STR);
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
             $response = [

@@ -28,14 +28,14 @@ function restoreSessionFromRememberMeCookie($db)
 
     $sql = "SELECT * FROM user WHERE username = :username";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':username', $username, SQLITE3_TEXT);
+    $stmt->bindValue(':username', $username, PDO::PARAM_STR);
     $result = $stmt->execute();
 
     if (!$result) {
         return false;
     }
 
-    $userData = $result->fetchArray(SQLITE3_ASSOC);
+    $userData = $result->fetchArray(PDO::FETCH_ASSOC);
     if (!isset($userData['id'])) {
         return false;
     }
@@ -45,20 +45,20 @@ function restoreSessionFromRememberMeCookie($db)
 
     $adminQuery = "SELECT login_disabled FROM admin";
     $adminResult = $db->query($adminQuery);
-    $adminRow = $adminResult->fetchArray(SQLITE3_ASSOC);
+    $adminRow = $adminResult->fetchArray(PDO::FETCH_ASSOC);
 
     if ($adminRow['login_disabled'] == 1) {
         $sql = "SELECT * FROM login_tokens WHERE user_id = :userId";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':userId', $userId, SQLITE3_TEXT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_STR);
     } else {
         $sql = "SELECT * FROM login_tokens WHERE user_id = :userId AND token = :token";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':userId', $userId, SQLITE3_TEXT);
-        $stmt->bindParam(':token', $token, SQLITE3_TEXT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_STR);
+        $stmt->bindParam(':token', $token, PDO::PARAM_STR);
     }
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($row == false) {
         return false;

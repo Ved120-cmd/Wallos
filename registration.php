@@ -28,24 +28,24 @@ if (!file_exists('images/uploads/logos')) {
 }
 
 // If there's already a user on the database, redirect to login page if registrations are closed or maxn users is reached
-$stmt = $db->prepare('SELECT COUNT(*) as userCount FROM user');
+$stmt = $db->prepare('SELECT COUNT(*) AS "userCount" FROM user');
 $result = $stmt->execute();
-$userCountResult = $result->fetchArray(SQLITE3_ASSOC);
-$userCount = $userCountResult['userCount'];
+if ($result === false) {
+    die('Unable to count users: ' . $db->lastErrorMsg());
+}
+$userCountResult = $result->fetchArray(PDO::FETCH_ASSOC);
+$userCount = (int) ($userCountResult['userCount'] ?? 0);
 
 if ($userCount == 0) {
-    $setupTokenFile = __DIR__ . '/db/setup_token.db';
-    if (!file_exists($setupTokenFile)) {
-        $setupToken = bin2hex(random_bytes(32));
-        file_put_contents($setupTokenFile, $setupToken);
-        error_log("Setup token for database restore: " . $setupToken);
+    if (getenv('WALLOS_SETUP_TOKEN') === false || getenv('WALLOS_SETUP_TOKEN') === '') {
+        error_log('WALLOS_SETUP_TOKEN is not configured; database import is disabled.');
     }
 }
 
 if ($userCount > 0) {
     $stmt = $db->prepare('SELECT * FROM admin');
     $result = $stmt->execute();
-    $settings = $result->fetchArray(SQLITE3_ASSOC);
+    $settings = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($settings['registrations_open'] == 0) {
         header("Location: login.php");
@@ -191,7 +191,7 @@ if (isset($_POST['username'])) {
 
     $emailQuery = "SELECT * FROM user WHERE email = :email";
     $stmtEmail = $db->prepare($emailQuery);
-    $stmtEmail->bindValue(':email', $email, SQLITE3_TEXT);
+    $stmtEmail->bindValue(':email', $email, PDO::PARAM_STR);
     $resultEmail = $stmtEmail->execute();
 
     if ($resultEmail->fetchArray()) {
@@ -201,7 +201,7 @@ if (isset($_POST['username'])) {
 
     $usernameQuery = "SELECT * FROM user WHERE username = :username";
     $stmtUsername = $db->prepare($usernameQuery);
-    $stmtUsername->bindValue(':username', $username, SQLITE3_TEXT);
+    $stmtUsername->bindValue(':username', $username, PDO::PARAM_STR);
     $resultUsername = $stmtUsername->execute();
 
     if ($resultUsername->fetchArray()) {
@@ -215,16 +215,16 @@ if (isset($_POST['username'])) {
         $query = "INSERT INTO user (username, firstname, lastname, email, password, main_currency, avatar, language, budget, api_key) VALUES (:username, :firstname, :lastname, :email, :password, :main_currency, :avatar, :language, :budget, :api_key)";
         $stmt = $db->prepare($query);
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $stmt->bindValue(':username', $username, SQLITE3_TEXT);
-        $stmt->bindValue(':firstname', $firstname, SQLITE3_TEXT);
-        $stmt->bindValue(':lastname', $lastname, SQLITE3_TEXT);
-        $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-        $stmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
-        $stmt->bindValue(':main_currency', $main_currency_id, SQLITE3_TEXT);
-        $stmt->bindValue(':avatar', $avatar, SQLITE3_TEXT);
-        $stmt->bindValue(':language', $language, SQLITE3_TEXT);
-        $stmt->bindValue(':budget', 0, SQLITE3_INTEGER);
-        $stmt->bindValue(':api_key', bin2hex(random_bytes(32)), SQLITE3_TEXT);
+        $stmt->bindValue(':username', $username, PDO::PARAM_STR);
+        $stmt->bindValue(':firstname', $firstname, PDO::PARAM_STR);
+        $stmt->bindValue(':lastname', $lastname, PDO::PARAM_STR);
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+        $stmt->bindValue(':main_currency', $main_currency_id, PDO::PARAM_STR);
+        $stmt->bindValue(':avatar', $avatar, PDO::PARAM_STR);
+        $stmt->bindValue(':language', $language, PDO::PARAM_STR);
+        $stmt->bindValue(':budget', 0, PDO::PARAM_INT);
+        $stmt->bindValue(':api_key', bin2hex(random_bytes(32)), PDO::PARAM_STR);
         $result = $stmt->execute();
 
         if ($result) {
@@ -235,8 +235,8 @@ if (isset($_POST['username'])) {
             // Add username as household member for that user
             $query = "INSERT INTO household (name, user_id) VALUES (:name, :user_id)";
             $stmt = $db->prepare($query);
-            $stmt->bindValue(':name', $username, SQLITE3_TEXT);
-            $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(':name', $username, PDO::PARAM_STR);
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
             $stmt->execute();
 
             if ($userId > 1) {
@@ -245,9 +245,9 @@ if (isset($_POST['username'])) {
                 $query = 'INSERT INTO categories (name, "order", user_id) VALUES (:name, :order, :user_id)';
                 $stmt = $db->prepare($query);
                 foreach ($categories as $index => $category) {
-                    $stmt->bindValue(':name', $category['name'], SQLITE3_TEXT);
-                    $stmt->bindValue(':order', $index + 1, SQLITE3_INTEGER);
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                    $stmt->bindValue(':name', $category['name'], PDO::PARAM_STR);
+                    $stmt->bindValue(':order', $index + 1, PDO::PARAM_INT);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                     $stmt->execute();
                 }
 
@@ -255,10 +255,10 @@ if (isset($_POST['username'])) {
                 $query = 'INSERT INTO payment_methods (name, icon, "order", user_id) VALUES (:name, :icon, :order, :user_id)';
                 $stmt = $db->prepare($query);
                 foreach ($payment_methods as $index => $payment_method) {
-                    $stmt->bindValue(':name', $payment_method['name'], SQLITE3_TEXT);
-                    $stmt->bindValue(':icon', $payment_method['icon'], SQLITE3_TEXT);
-                    $stmt->bindValue(':order', $index + 1, SQLITE3_INTEGER);
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                    $stmt->bindValue(':name', $payment_method['name'], PDO::PARAM_STR);
+                    $stmt->bindValue(':icon', $payment_method['icon'], PDO::PARAM_STR);
+                    $stmt->bindValue(':order', $index + 1, PDO::PARAM_INT);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                     $stmt->execute();
                 }
 
@@ -266,49 +266,49 @@ if (isset($_POST['username'])) {
                 $query = "INSERT INTO currencies (name, symbol, code, rate, user_id) VALUES (:name, :symbol, :code, :rate, :user_id)";
                 $stmt = $db->prepare($query);
                 foreach ($currencies as $currency) {
-                    $stmt->bindValue(':name', $currency['name'], SQLITE3_TEXT);
-                    $stmt->bindValue(':symbol', $currency['symbol'], SQLITE3_TEXT);
-                    $stmt->bindValue(':code', $currency['code'], SQLITE3_TEXT);
-                    $stmt->bindValue(':rate', 1, SQLITE3_FLOAT);
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                    $stmt->bindValue(':name', $currency['name'], PDO::PARAM_STR);
+                    $stmt->bindValue(':symbol', $currency['symbol'], PDO::PARAM_STR);
+                    $stmt->bindValue(':code', $currency['code'], PDO::PARAM_STR);
+                    $stmt->bindValue(':rate', 1, PDO::PARAM_STR);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                     $stmt->execute();
                 }
 
                 // Retrieve main currency id
                 $query = "SELECT id FROM currencies WHERE code = :code AND user_id = :user_id";
                 $stmt = $db->prepare($query);
-                $stmt->bindValue(':code', $main_currency, SQLITE3_TEXT);
-                $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                $stmt->bindValue(':code', $main_currency, PDO::PARAM_STR);
+                $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                 $result = $stmt->execute();
-                $currency = $result->fetchArray(SQLITE3_ASSOC);
+                $currency = $result->fetchArray(PDO::FETCH_ASSOC);
 
                 // Update user main currency
                 $query = "UPDATE user SET main_currency = :main_currency WHERE id = :user_id";
                 $stmt = $db->prepare($query);
-                $stmt->bindValue(':main_currency', $currency['id'], SQLITE3_INTEGER);
-                $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                $stmt->bindValue(':main_currency', $currency['id'], PDO::PARAM_INT);
+                $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                 $stmt->execute();
 
                 // Add settings for that user
                 $query = "INSERT INTO settings (dark_theme, monthly_price, convert_currency, remove_background, color_theme, hide_disabled, user_id, disabled_to_bottom, show_original_price, mobile_nav, week_starts_sunday) 
                           VALUES (2, 0, 0, 0, 'blue', 0, :user_id, 0, 0, 0, 0)";
                 $stmt = $db->prepare($query);
-                $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                 $stmt->execute();
 
                 // If email verification is required add the user to the email_verification table
                 $query = "SELECT * FROM admin";
                 $stmt = $db->prepare($query);
                 $result = $stmt->execute();
-                $settings = $result->fetchArray(SQLITE3_ASSOC);
+                $settings = $result->fetchArray(PDO::FETCH_ASSOC);
 
                 if ($settings['require_email_verification'] == 1) {
                     $query = "INSERT INTO email_verification (user_id, email, token, email_sent) VALUES (:user_id, :email, :token, 0)";
                     $stmt = $db->prepare($query);
                     $token = bin2hex(random_bytes(32));
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
-                    $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-                    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+                    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+                    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
                     $stmt->execute();
 
                     $requireValidation = true;

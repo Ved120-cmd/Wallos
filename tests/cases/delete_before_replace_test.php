@@ -206,9 +206,9 @@ wallos_test('the second row really does get in, and reading the result is what s
     $save = function ($colour) use ($db) {
         $stmt = $db->prepare('INSERT INTO custom_colors (main_color, accent_color, hover_color, user_id)
                               VALUES (:main, :accent, :hover, 1)');
-        $stmt->bindValue(':main', $colour, SQLITE3_TEXT);
-        $stmt->bindValue(':accent', '#00ffff', SQLITE3_TEXT);
-        $stmt->bindValue(':hover', '#00008b', SQLITE3_TEXT);
+        $stmt->bindValue(':main', $colour, PDO::PARAM_STR);
+        $stmt->bindValue(':accent', '#00ffff', PDO::PARAM_STR);
+        $stmt->bindValue(':hover', '#00008b', PDO::PARAM_STR);
         $stmt->execute();
     };
 
@@ -219,18 +219,20 @@ wallos_test('the second row really does get in, and reading the result is what s
     $refuseDeletes = function () use ($db) {
         // A delete fails for reasons the endpoint cannot see coming: a database
         // locked by another request, a disk that is full or has gone read-only.
-        // SQLite reports all of them the same way, through the statement
+        // The database reports all of them through the statement
         // result, so a trigger that refuses the delete reproduces the case
         // exactly and without waiting for a race.
+        $db->exec("CREATE OR REPLACE FUNCTION wallos_test_refuse_delete() RETURNS trigger
+               LANGUAGE plpgsql AS 'BEGIN RAISE EXCEPTION ''refused''; END;'");
         $db->exec("CREATE TRIGGER wallos_test_refuse_delete BEFORE DELETE ON custom_colors
-                   BEGIN SELECT RAISE(ABORT, 'refused'); END");
+               FOR EACH ROW EXECUTE FUNCTION wallos_test_refuse_delete()");
     };
 
     // What the user saved last week.
     $save('#000000');
     $refuseDeletes();
 
-    // The shape these endpoints had. The @ only silences the warning SQLite3
+    // The shape these endpoints had. The @ only silences the warning WallosDatabase
     // prints beside the return value the caller is about to ignore.
     $stmt = $db->prepare('DELETE FROM custom_colors WHERE user_id = 1');
     $dropped = @$stmt->execute();
@@ -240,10 +242,13 @@ wallos_test('the second row really does get in, and reading the result is what s
     assert_same(2, $rows(),
         'unchecked, a failed delete leaves the replacement beside the row it should have replaced');
 
+    $db->exec('DROP TRIGGER wallos_test_refuse_delete ON custom_colors');
+    $db->exec('DROP FUNCTION wallos_test_refuse_delete()');
+
     // Which of the two any page gets is decided by nothing: every reader of
     // this table selects by user_id and takes the first row of the result.
     $reader = $db->query('SELECT * FROM custom_colors WHERE user_id = 1');
-    assert_true($reader->fetchArray(SQLITE3_ASSOC) !== false,
+    assert_true($reader->fetchArray(PDO::FETCH_ASSOC) !== false,
         'and the reader answers with one of them without being able to say which');
 
     // Back to one row, then the shape they have now.

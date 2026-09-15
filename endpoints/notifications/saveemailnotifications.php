@@ -37,7 +37,7 @@ if (
 
     $query = "SELECT COUNT(*) FROM email_notifications WHERE user_id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result === false) {
@@ -59,15 +59,15 @@ if (
         }
 
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':enabled', $enabled, SQLITE3_INTEGER);
-        $stmt->bindValue(':smtpAddress', $smtpAddress, SQLITE3_TEXT);
-        $stmt->bindValue(':smtpPort', $smtpPort, SQLITE3_INTEGER);
-        $stmt->bindValue(':smtpUsername', $smtpUsername, SQLITE3_TEXT);
-        $stmt->bindValue(':smtpPassword', $smtpPassword, SQLITE3_TEXT);
-        $stmt->bindValue(':fromEmail', $fromEmail, SQLITE3_TEXT);
-        $stmt->bindValue(':otherEmails', $otherEmails, SQLITE3_TEXT);
-        $stmt->bindValue(':encryption', $encryption, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':enabled', $enabled, PDO::PARAM_INT);
+        $stmt->bindValue(':smtpAddress', $smtpAddress, PDO::PARAM_STR);
+        $stmt->bindValue(':smtpPort', $smtpPort, PDO::PARAM_INT);
+        $stmt->bindValue(':smtpUsername', $smtpUsername, PDO::PARAM_STR);
+        $stmt->bindValue(':smtpPassword', $smtpPassword, PDO::PARAM_STR);
+        $stmt->bindValue(':fromEmail', $fromEmail, PDO::PARAM_STR);
+        $stmt->bindValue(':otherEmails', $otherEmails, PDO::PARAM_STR);
+        $stmt->bindValue(':encryption', $encryption, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
             $response = [

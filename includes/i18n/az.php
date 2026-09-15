@@ -22,7 +22,7 @@ $i18n = [
     "setup_token" => "Quraşdırma tokeni",
     "restore_database_info" => "Ehtiyat nüsxəni bərpa etmək üçün quraşdırma tokeni lazımdır. Onu aşağıdakı üsullardan biri ilə əldə edin:",
     "setup_token_docker" => "Docker: docker logs &lt;konteyner-adı&gt; əmrini icra edin və \"Setup token for database restore\" sətrini tapın",
-    "setup_token_file" => "Fiziki server: serverinizdə db/setup_token.db faylını oxuyun",
+    "setup_token_file" => "Fiziki server: serverinizdə the WALLOS_SETUP_TOKEN environment variable faylını oxuyun",
     "select_backup_file" => "Ehtiyat nüsxə faylını seçin",
     // Login Page
     "please_login" => "Zəhmət olmasa daxil olun",

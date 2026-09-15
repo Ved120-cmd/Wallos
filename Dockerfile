@@ -6,9 +6,9 @@ WORKDIR /var/www/html
 
 # Update packages and install dependencies
 RUN apk upgrade --no-cache && \
-    apk add --no-cache dumb-init shadow sqlite-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev freetype freetype-dev curl autoconf libgomp icu-dev icu-data-full nginx dcron tzdata libzip-dev sqlite libwebp-dev && \
-    docker-php-ext-install pdo pdo_sqlite calendar && \
-    docker-php-ext-enable pdo pdo_sqlite && \
+    apk add --no-cache dumb-init shadow postgresql-dev postgresql-client libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev freetype freetype-dev curl autoconf libgomp icu-dev icu-data-full nginx dcron tzdata libzip-dev libwebp-dev && \
+    docker-php-ext-install pdo pdo_pgsql calendar && \
+    docker-php-ext-enable pdo pdo_pgsql && \
     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
     docker-php-ext-install -j$(nproc) gd intl zip
 
@@ -35,7 +35,10 @@ RUN dos2unix /etc/cron.d/cronjobs && \
     chmod +x /var/www/html/startup.sh && \
     echo 'pm.max_children = 15' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'pm.max_requests = 500' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    printf 'upload_max_filesize = 256M\npost_max_size = 256M\n' > /usr/local/etc/php/conf.d/wallos-uploads.ini
+    printf 'upload_max_filesize = 256M\npost_max_size = 256M\nsession.save_path = "/tmp/wallos-sessions"\nsession.gc_maxlifetime = 2592000\n' > /usr/local/etc/php/conf.d/wallos-uploads.ini && \
+    mkdir -p /tmp/wallos-sessions && \
+    chown -R www-data:www-data /tmp/wallos-sessions && \
+    chmod 770 /tmp/wallos-sessions
 
 # Expose port 80 for Nginx
 EXPOSE 80

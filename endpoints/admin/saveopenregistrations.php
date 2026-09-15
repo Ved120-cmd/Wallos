@@ -24,7 +24,7 @@ if ($disableLogin == 1) {
     $sql = "SELECT COUNT(*) as userCount FROM user";
     $stmt = $db->prepare($sql);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $userCount = $row['userCount'];
 
     if ($userCount > 1) {
@@ -46,11 +46,11 @@ if ($requireEmailVerification == 1 && $serverUrl == "") {
 
 $sql = "UPDATE admin SET registrations_open = :openRegistrations, max_users = :maxUsers, require_email_verification = :requireEmailVerification, server_url = :serverUrl, login_disabled = :disableLogin WHERE id = 1";
 $stmt = $db->prepare($sql);
-$stmt->bindParam(':openRegistrations', $openRegistrations, SQLITE3_INTEGER);
-$stmt->bindParam(':maxUsers', $maxUsers, SQLITE3_INTEGER);
-$stmt->bindParam(':requireEmailVerification', $requireEmailVerification, SQLITE3_INTEGER);
-$stmt->bindParam(':serverUrl', $serverUrl, SQLITE3_TEXT);
-$stmt->bindParam(':disableLogin', $disableLogin, SQLITE3_INTEGER);
+$stmt->bindParam(':openRegistrations', $openRegistrations, PDO::PARAM_INT);
+$stmt->bindParam(':maxUsers', $maxUsers, PDO::PARAM_INT);
+$stmt->bindParam(':requireEmailVerification', $requireEmailVerification, PDO::PARAM_INT);
+$stmt->bindParam(':serverUrl', $serverUrl, PDO::PARAM_STR);
+$stmt->bindParam(':disableLogin', $disableLogin, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result) {

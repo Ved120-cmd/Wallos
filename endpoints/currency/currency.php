@@ -29,11 +29,11 @@ function handleAddCurrency($db, $userId, $i18n)
     $currencyRate = 1;
     $sqlInsert = "INSERT INTO currencies (name, symbol, code, rate, user_id) VALUES (:name, :symbol, :code, :rate, :userId)";
     $stmtInsert = $db->prepare($sqlInsert);
-    $stmtInsert->bindParam(':name', $currencyName, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':symbol', $currencySymbol, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':code', $currencyCode, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':rate', $currencyRate, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmtInsert->bindParam(':name', $currencyName, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':symbol', $currencySymbol, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':code', $currencyCode, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':rate', $currencyRate, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
     $resultInsert = $stmtInsert->execute();
 
     if ($resultInsert) {
@@ -53,11 +53,11 @@ function handleEditCurrency($db, $userId, $i18n)
         $code = validate($_POST['code']);
         $sql = "UPDATE currencies SET name = :name, symbol = :symbol, code = :code WHERE id = :currencyId AND user_id = :userId";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmt->bindParam(':symbol', $symbol, SQLITE3_TEXT);
-        $stmt->bindParam(':code', $code, SQLITE3_TEXT);
-        $stmt->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmt->bindParam(':symbol', $symbol, PDO::PARAM_STR);
+        $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+        $stmt->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
 
         if ($result) {
@@ -87,16 +87,16 @@ function handleDeleteCurrency($db, $userId, $i18n)
     if (isset($_POST['currencyId']) && $_POST['currencyId'] != "") {
         $query = "SELECT main_currency FROM user WHERE id = :userId";
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $row = $result->fetchArray(PDO::FETCH_ASSOC);
         $mainCurrencyId = $row['main_currency'];
 
         $currencyId = $_POST['currencyId'];
         $checkQuery = "SELECT COUNT(*) FROM subscriptions WHERE currency_id = :currencyId AND user_id = :userId";
         $checkStmt = $db->prepare($checkQuery);
-        $checkStmt->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $checkStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $checkStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
         $row = $checkResult->fetchArray();
         $count = $row[0];
@@ -119,8 +119,8 @@ function handleDeleteCurrency($db, $userId, $i18n)
             } else {
                 $sql = "DELETE FROM currencies WHERE id = :currencyId AND user_id = :userId";
                 $stmt = $db->prepare($sql);
-                $stmt->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-                $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+                $stmt->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+                $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
                 $result = $stmt->execute();
                 if ($result) {
                     echo json_encode(["success" => true, "message" => translate('currency_removed', $i18n)]);

@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     // If the user is not found, return an error
     if (!$user) {
@@ -113,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $notification_settings = $result->fetchArray(SQLITE3_ASSOC);
+    $notification_settings = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($notification_settings) {
         unset($notification_settings['user_id']);
@@ -125,7 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $email_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $email_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($email_notifications) {
         unset($email_notifications['user_id']);
         if (isset($email_notifications['smtp_password'])) {
@@ -138,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $discord_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $discord_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($discord_notifications) {
         unset($discord_notifications['user_id']);
         $notification_settings['discord_notifications'] = $discord_notifications;
@@ -148,7 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $gotify_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $gotify_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($gotify_notifications) {
         unset($gotify_notifications['user_id']);
         if (isset($gotify_notifications['token'])) {
@@ -161,7 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $ntfy_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $ntfy_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($ntfy_notifications) {
         unset($ntfy_notifications['user_id']);
         if (isset($ntfy_notifications['headers'])) {
@@ -174,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $pushover_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $pushover_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($pushover_notifications) {
         unset($pushover_notifications['user_id']);
         if (isset($pushover_notifications['token'])) {
@@ -187,7 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $telegram_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $telegram_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($telegram_notifications) {
         unset($telegram_notifications['user_id']);
         if (isset($telegram_notifications['bot_token'])) {
@@ -200,7 +200,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $webhook_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $webhook_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($webhook_notifications) {
         unset($webhook_notifications['user_id']);
         if (isset($webhook_notifications['headers'])) {
@@ -214,7 +214,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($query);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $serverchan_notifications = $result->fetchArray(SQLITE3_ASSOC);
+    $serverchan_notifications = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($serverchan_notifications) {
         unset($serverchan_notifications['user_id']);
         if (isset($serverchan_notifications['sendkey'])) {

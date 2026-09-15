@@ -7,18 +7,18 @@
 require_once WALLOS_ROOT . '/includes/upcoming_payments.php';
 
 /**
- * Returns the query plan of a statement as one string.
+ * Returns the PostgreSQL query plan of a statement as one string.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param string  $sql
  * @return string
  */
 function index_plan($db, $sql)
 {
     $plan = '';
-    $result = $db->query('EXPLAIN QUERY PLAN ' . $sql);
-    while ($result && $row = $result->fetchArray(SQLITE3_ASSOC)) {
-        $plan .= $row['detail'] . ' ';
+    $result = $db->query('EXPLAIN ' . $sql);
+    while ($result && $row = $result->fetchArray(PDO::FETCH_ASSOC)) {
+        $plan .= ($row['QUERY PLAN'] ?? '') . ' ';
     }
 
     return trim($plan);
@@ -28,8 +28,8 @@ wallos_test('the migration creates the subscription indexes', function () {
     $db = wallos_test_open_database();
 
     $indexes = [];
-    $result = $db->query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='subscriptions'");
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    $result = $db->query("SELECT indexname AS name FROM pg_indexes WHERE schemaname = current_schema() AND tablename = 'subscriptions'");
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $indexes[] = $row['name'];
     }
 
@@ -50,7 +50,7 @@ wallos_test('the queries Wallos runs use an index instead of scanning', function
         'active subscriptions' => "SELECT * FROM subscriptions WHERE user_id = 1 AND inactive = 0",
         'notification cron' => "SELECT * FROM subscriptions WHERE user_id = 1 AND notify = 1 AND inactive = 0",
         'calendar range' => "SELECT * FROM subscriptions WHERE user_id = 1 AND inactive = 0 AND next_payment BETWEEN '2026-08-01' AND '2026-08-31'",
-        'dashboard cancellations' => "SELECT * FROM subscriptions WHERE user_id = 1 AND inactive = 0 AND cancellation_date IS NOT NULL AND cancellation_date != '' AND cancellation_date >= date('now') AND cycle != 5 ORDER BY cancellation_date ASC",
+        'dashboard cancellations' => "SELECT * FROM subscriptions WHERE user_id = 1 AND inactive = 0 AND cancellation_date IS NOT NULL AND cancellation_date != '' AND cancellation_date >= CURRENT_DATE AND cycle != 5 ORDER BY cancellation_date ASC",
     ];
 
     foreach ($cases as $label => $sql) {
@@ -68,7 +68,7 @@ wallos_test('the migration can run twice', function () {
 
     require WALLOS_ROOT . '/migrations/000055.php';
 
-    assert_true((bool) $db->querySingle("SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name='idx_subscriptions_user_inactive_next_payment'"),
+    assert_true((bool) $db->querySingle("SELECT COUNT(*) FROM pg_indexes WHERE schemaname = current_schema() AND indexname='idx_subscriptions_user_inactive_next_payment'"),
         'the index still exists after a second run');
 
     $db->close();
@@ -78,14 +78,14 @@ wallos_test('the dashboard limit migration defaults existing users to three', fu
     $db = wallos_test_open_database();
 
     $row = $db->query('SELECT upcoming_payments_limit FROM settings WHERE user_id = 1')
-        ->fetchArray(SQLITE3_ASSOC);
+        ->fetchArray(PDO::FETCH_ASSOC);
 
     assert_same(3, (int) $row['upcoming_payments_limit'], 'existing users keep the default limit');
 
     $db->exec('UPDATE settings SET upcoming_payments_limit = 4 WHERE user_id = 1');
     require WALLOS_ROOT . '/migrations/000057.php';
     $row = $db->query('SELECT upcoming_payments_limit FROM settings WHERE user_id = 1')
-        ->fetchArray(SQLITE3_ASSOC);
+        ->fetchArray(PDO::FETCH_ASSOC);
     assert_same(3, (int) $row['upcoming_payments_limit'], 'invalid stored values are reset to the default');
 
     require WALLOS_ROOT . '/migrations/000057.php';
@@ -110,9 +110,9 @@ wallos_test('the dashboard keeps the legacy default of three upcoming payments',
     $stmt = $db->prepare('INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, inactive)
                           VALUES (1, :name, 9.99, :currencyId, :nextPayment, 3, 0)');
     for ($i = 1; $i <= 5; $i++) {
-        $stmt->bindValue(':name', 'payment-' . $i, SQLITE3_TEXT);
-        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), SQLITE3_INTEGER);
-        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+' . $i . ' days')), SQLITE3_TEXT);
+        $stmt->bindValue(':name', 'payment-' . $i, PDO::PARAM_STR);
+        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), PDO::PARAM_INT);
+        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+' . $i . ' days')), PDO::PARAM_STR);
         $stmt->execute();
     }
 
@@ -128,9 +128,9 @@ wallos_test('the dashboard supports the configured limits', function () {
     $stmt = $db->prepare('INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, inactive)
                           VALUES (1, :name, 9.99, :currencyId, :nextPayment, 3, 0)');
     for ($i = 1; $i <= 25; $i++) {
-        $stmt->bindValue(':name', 'payment-' . $i, SQLITE3_TEXT);
-        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), SQLITE3_INTEGER);
-        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+' . $i . ' days')), SQLITE3_TEXT);
+        $stmt->bindValue(':name', 'payment-' . $i, PDO::PARAM_STR);
+        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), PDO::PARAM_INT);
+        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+' . $i . ' days')), PDO::PARAM_STR);
         $stmt->execute();
     }
 

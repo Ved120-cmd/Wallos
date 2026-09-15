@@ -12,11 +12,11 @@ function update_exchange_rate($db, $userId)
 {
     $query = "SELECT api_key, provider FROM fixer WHERE user_id = :userId";
     $stmt = $db->prepare($query);
-    $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result) {
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
         if ($row) {
             $apiKey = $row['api_key'];
@@ -25,16 +25,16 @@ function update_exchange_rate($db, $userId)
             $codes = "";
             $query = "SELECT id, name, symbol, code FROM currencies";
             $result = $db->query($query);
-            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+            while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
                 $codes .= $row['code'] . ",";
             }
             $codes = rtrim($codes, ',');
 
             $query = "SELECT u.main_currency, c.code FROM user u LEFT JOIN currencies c ON u.main_currency = c.id WHERE u.id = :userId";
             $stmt = $db->prepare($query);
-            $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
             $result = $stmt->execute();
-            $row = $result->fetchArray(SQLITE3_ASSOC);
+            $row = $result->fetchArray(PDO::FETCH_ASSOC);
             $mainCurrencyCode = $row['code'];
             $mainCurrencyId = $row['main_currency'];
 
@@ -65,9 +65,9 @@ function update_exchange_rate($db, $userId)
                     }
                     $updateQuery = "UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId";
                     $updateStmt = $db->prepare($updateQuery);
-                    $updateStmt->bindParam(':rate', $exchangeRate, SQLITE3_TEXT);
-                    $updateStmt->bindParam(':code', $currencyCode, SQLITE3_TEXT);
-                    $updateStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+                    $updateStmt->bindParam(':rate', $exchangeRate, PDO::PARAM_STR);
+                    $updateStmt->bindParam(':code', $currencyCode, PDO::PARAM_STR);
+                    $updateStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
                     $updateResult = $updateStmt->execute();
                 }
                 $currentDate = new DateTime();
@@ -75,9 +75,9 @@ function update_exchange_rate($db, $userId)
 
                 $query = "SELECT * FROM last_exchange_update WHERE user_id = :userId";
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+                $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
                 $result = $stmt->execute();
-                $row = $result->fetchArray(SQLITE3_ASSOC);
+                $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
                 if ($row) {
                     $query = "UPDATE last_exchange_update SET date = :formattedDate WHERE user_id = :userId";
@@ -86,8 +86,8 @@ function update_exchange_rate($db, $userId)
                 }
 
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(':formattedDate', $formattedDate, SQLITE3_TEXT);
-                $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+                $stmt->bindParam(':formattedDate', $formattedDate, PDO::PARAM_STR);
+                $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
                 $resutl = $stmt->execute();
 
                 $db->close();
@@ -100,9 +100,9 @@ $demoMode = getenv('DEMO_MODE');
 
 $query = "SELECT main_currency FROM user WHERE id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 $mainCurrencyId = $row['main_currency'];
 
 function sanitizeFilename($filename)
@@ -213,19 +213,19 @@ if (
 
     $query = "SELECT email FROM user WHERE id = :user_id";
     $stmt = $db->prepare($query);
-    $stmt->bindValue(':user_id', $userId, SQLITE3_TEXT);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     $oldEmail = $user['email'];
 
     if ($oldEmail != $email) {
         $query = "SELECT email FROM user WHERE email = :email AND id != :userId";
         $stmt = $db->prepare($query);
-        $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        $otherUser = $result->fetchArray(SQLITE3_ASSOC);
+        $otherUser = $result->fetchArray(PDO::FETCH_ASSOC);
 
         if ($otherUser) {
             $response = [
@@ -258,8 +258,8 @@ if (
 
         if ($avatar !== "") {
             $stmt = $db->prepare("INSERT INTO uploaded_avatars (user_id, path) VALUES (:userId, :path)");
-            $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
-            $stmt->bindParam(':path', $avatar, SQLITE3_TEXT);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->bindParam(':path', $avatar, PDO::PARAM_STR);
             $stmt->execute();
         }
     }
@@ -293,17 +293,17 @@ if (
     }
 
     $stmt = $db->prepare($sql);
-    $stmt->bindParam(':avatar', $avatar, SQLITE3_TEXT);
-    $stmt->bindParam(':firstname', $firstname, SQLITE3_TEXT);
-    $stmt->bindParam(':lastname', $lastname, SQLITE3_TEXT);
-    $stmt->bindParam(':email', $email, SQLITE3_TEXT);
-    $stmt->bindParam(':main_currency', $main_currency, SQLITE3_INTEGER);
-    $stmt->bindParam(':language', $language, SQLITE3_TEXT);
-    $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(':avatar', $avatar, PDO::PARAM_STR);
+    $stmt->bindParam(':firstname', $firstname, PDO::PARAM_STR);
+    $stmt->bindParam(':lastname', $lastname, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':main_currency', $main_currency, PDO::PARAM_INT);
+    $stmt->bindParam(':language', $language, PDO::PARAM_STR);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
     if (isset($_POST['password']) && $_POST['password'] != "" && !$demoMode) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $stmt->bindParam(':password', $hashedPassword, SQLITE3_TEXT);
+        $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
     }
 
     $result = $stmt->execute();

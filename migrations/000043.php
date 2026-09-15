@@ -6,10 +6,10 @@
 */
 
 // Check if the column already exists to prevent errors on multiple runs
-$query = $db->query("PRAGMA table_info(admin)");
+$query = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'admin'");
 $columnExists = false;
 
-while ($row = $query->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $query->fetchArray(PDO::FETCH_ASSOC)) {
     if ($row['name'] === 'local_webhook_notifications_allowlist') {
         $columnExists = true;
         break;

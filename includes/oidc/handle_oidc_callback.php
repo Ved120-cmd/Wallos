@@ -89,9 +89,9 @@ $oidcSub = $userInfo[$oidcSettings['user_identifier_field']];
 
 // Check if sub matches an existing user
 $stmt = $db->prepare('SELECT * FROM user WHERE oidc_sub = :oidcSub');
-$stmt->bindValue(':oidcSub', $oidcSub, SQLITE3_TEXT);
+$stmt->bindValue(':oidcSub', $oidcSub, PDO::PARAM_STR);
 $result = $stmt->execute();
-$userData = $result->fetchArray(SQLITE3_ASSOC);
+$userData = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($userData) {
     // User exists, log the user in
@@ -116,14 +116,14 @@ if ($userData) {
     }
 
     $stmt = $db->prepare('SELECT * FROM user WHERE email = :email');
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $userData = $result->fetchArray(SQLITE3_ASSOC);
+    $userData = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($userData) {
         // Update existing user with OIDC sub
         $stmt = $db->prepare('UPDATE user SET oidc_sub = :oidcSub WHERE id = :userId');
-        $stmt->bindValue(':oidcSub', $oidcSub, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', $userData['id'], SQLITE3_INTEGER);
+        $stmt->bindValue(':oidcSub', $oidcSub, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userData['id'], PDO::PARAM_INT);
         $stmt->execute();
 
         // Log the user in
@@ -140,9 +140,9 @@ if ($userData) {
 
             while (true) {
                 $stmt = $db->prepare('SELECT COUNT(*) as count FROM user WHERE username = :username');
-                $stmt->bindValue(':username', $username, SQLITE3_TEXT);
+                $stmt->bindValue(':username', $username, PDO::PARAM_STR);
                 $result = $stmt->execute();
-                $row = $result->fetchArray(SQLITE3_ASSOC);
+                $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
                 if ($row['count'] == 0) {
                     break; // Username is available

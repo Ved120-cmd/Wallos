@@ -30,8 +30,8 @@ $allowStandardUsers = !empty($data['allow_standard_users_local_webhooks']) ? 1 :
 // Update the admin table (assuming id 1 is the primary settings row, as in your reference)
 $sql = "UPDATE admin SET local_webhook_notifications_allowlist = :allowlist, allow_standard_users_local_webhooks = :allowStandardUsers WHERE id = 1";
 $stmt = $db->prepare($sql);
-$stmt->bindParam(':allowlist', $allowlist, SQLITE3_TEXT);
-$stmt->bindParam(':allowStandardUsers', $allowStandardUsers, SQLITE3_INTEGER);
+$stmt->bindParam(':allowlist', $allowlist, PDO::PARAM_STR);
+$stmt->bindParam(':allowStandardUsers', $allowStandardUsers, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result) {

@@ -16,8 +16,8 @@ if (!isset($show_original_price) || !is_bool($show_original_price)) {
 }
 
 $stmt = $db->prepare('UPDATE settings SET show_original_price = :show_original_price WHERE user_id = :userId');
-$stmt->bindParam(':show_original_price', $show_original_price, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':show_original_price', $show_original_price, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

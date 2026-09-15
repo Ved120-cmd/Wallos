@@ -3,8 +3,8 @@
 // This migration lets each user choose how many upcoming payments appear on
 // the dashboard (3, 5, 10, or 20); existing users keep the old default.
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('settings') WHERE name='upcoming_payments_limit'");
-if ($columnQuery->fetchArray(SQLITE3_ASSOC) === false) {
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'settings' AND column_name = 'upcoming_payments_limit'");
+if ($columnQuery->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE settings ADD COLUMN upcoming_payments_limit INTEGER DEFAULT 3');
 }
 

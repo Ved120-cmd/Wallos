@@ -18,8 +18,8 @@ if (!isset($data['color']) || !in_array($data['color'], $allowedColors)) {
 $color = $data['color'];
 
 $stmt = $db->prepare('UPDATE settings SET color_theme = :color WHERE user_id = :userId');
-$stmt->bindParam(':color', $color, SQLITE3_TEXT);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':color', $color, PDO::PARAM_STR);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

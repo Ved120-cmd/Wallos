@@ -6,13 +6,13 @@
 */
 
 $db->exec("CREATE TABLE IF NOT EXISTS telegram_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     bot_token TEXT DEFAULT '',
     chat_id TEXT DEFAULT ''
 )");
 
 $db->exec("CREATE TABLE IF NOT EXISTS webhook_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     headers TEXT DEFAULT '',
     url TEXT DEFAULT '',
     request_method TEXT DEFAULT 'POST',
@@ -21,13 +21,13 @@ $db->exec("CREATE TABLE IF NOT EXISTS webhook_notifications (
 )");
 
 $db->exec("CREATE TABLE IF NOT EXISTS gotify_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     url TEXT DEFAULT '',
     token TEXT DEFAULT ''
 )");
 
 $db->exec("CREATE TABLE IF NOT EXISTS email_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     smtp_address TEXT DEFAULT '',
     smtp_port INTEGER DEFAULT 587,
     smtp_username TEXT DEFAULT '',
@@ -42,7 +42,7 @@ $db->exec('CREATE TABLE IF NOT EXISTS notification_settings (
 
 // Check if old email notifications table has data and migrate it
 $result = $db->query('SELECT COUNT(*) as count FROM notifications');
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($row['count'] > 0) {
     // Copy data from notifications to email_notifications

@@ -16,8 +16,8 @@ if (!isset($theme) || !is_int($theme) || $theme < 0 || $theme > 2) {
 }
 
 $stmt = $db->prepare('UPDATE settings SET dark_theme = :theme WHERE user_id = :userId');
-$stmt->bindParam(':theme', $theme, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':theme', $theme, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

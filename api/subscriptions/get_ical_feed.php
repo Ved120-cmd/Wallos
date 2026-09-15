@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     // If the user is not found, return an error
     if (!$user) {
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $lastExchangeUpdate = $result->fetchArray(SQLITE3_ASSOC);
+    $lastExchangeUpdate = $result->fetchArray(PDO::FETCH_ASSOC);
 
     $canConvertCurrency = empty($lastExchangeUpdate['date']) ? false : true;
 
@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $currencies = [];
-    while ($currency = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($currency = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $currencies[$currency['id']] = $currency;
     }
 
@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $categories = [];
-    while ($category = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($category = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $categories[$category['id']] = $category['name'];
     }
 
@@ -88,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $members = [];
-    while ($member = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($member = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $members[$member['id']] = $member['name'];
     }
 
@@ -98,19 +98,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $paymentMethods = [];
-    while ($paymentMethod = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($paymentMethod = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $paymentMethods[$paymentMethod['id']] = $paymentMethod['name'];
     }
 
     $sql = "SELECT * FROM subscriptions WHERE user_id = :userId AND inactive = 0 ORDER BY next_payment ASC";
 
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     if ($result) {
         $subscriptions = array();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $subscriptions[] = $row;
         }
     }
@@ -120,10 +120,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     // Get notification settings
     $notificationQuery = "SELECT days FROM notification_settings WHERE user_id = :userId";
     $notificationQueryStmt = $db->prepare($notificationQuery);
-    $notificationQueryStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $notificationQueryStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $notificationResult = $notificationQueryStmt->execute();
     $globalNotificationDays = 1; // Default value
-    if ($row = $notificationResult->fetchArray(SQLITE3_ASSOC)) {
+    if ($row = $notificationResult->fetchArray(PDO::FETCH_ASSOC)) {
         $globalNotificationDays = $row['days'];
     }
 

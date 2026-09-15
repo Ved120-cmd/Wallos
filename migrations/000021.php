@@ -5,7 +5,7 @@
 */
 
 $db->exec("CREATE TABLE IF NOT EXISTS ntfy_notifications (
-    enabled BOOLEAN DEFAULT 0,
+    enabled INTEGER DEFAULT 0,
     host TEXT DEFAULT '',
     topic TEXT DEFAULT '',
     headers TEXT DEFAULT '',

@@ -22,7 +22,7 @@ $i18n = [
     "setup_token" => "رمز الإعداد",
     "restore_database_info" => "يلزم رمز إعداد لاستعادة نسخة احتياطية. احصل عليه بإحدى الطريقتين الآتيتين:",
     "setup_token_docker" => "Docker: شغّل docker logs &lt;container-name&gt; وابحث عن \"Setup token for database restore\"",
-    "setup_token_file" => "التثبيت المباشر: اقرأ الملف db/setup_token.db على خادمك",
+    "setup_token_file" => "التثبيت المباشر: اقرأ الملف the WALLOS_SETUP_TOKEN environment variable على خادمك",
     "select_backup_file" => "اختيار ملف النسخة الاحتياطية",
     // صفحة تسجيل الدخول
     "please_login" => "يرجى تسجيل الدخول",

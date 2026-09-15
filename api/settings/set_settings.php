@@ -63,9 +63,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -83,12 +83,12 @@ if (isset($_POST['css'])) {
     $customCss = $_POST['css'];
     
     $stmtDelCss = $db->prepare('DELETE FROM custom_css_style WHERE user_id = :userId');
-    $stmtDelCss->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmtDelCss->bindValue(':userId', $userId, PDO::PARAM_INT);
     $stmtDelCss->execute();
 
     $stmtInsCss = $db->prepare('INSERT INTO custom_css_style (css, user_id) VALUES (:customCss, :userId)');
-    $stmtInsCss->bindValue(':customCss', $customCss, SQLITE3_TEXT);
-    $stmtInsCss->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmtInsCss->bindValue(':customCss', $customCss, PDO::PARAM_STR);
+    $stmtInsCss->bindValue(':userId', $userId, PDO::PARAM_INT);
     $stmtInsCss->execute();
 }
 
@@ -99,9 +99,9 @@ if (isset($_POST['main_color']) || isset($_POST['accent_color']) || isset($_POST
     // Fetch current custom colors to allow partial updates
     $colorSql = "SELECT * FROM custom_colors WHERE user_id = :userId";
     $colorStmt = $db->prepare($colorSql);
-    $colorStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $colorStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $colorResult = $colorStmt->execute();
-    $currentColor = $colorResult->fetchArray(SQLITE3_ASSOC) ?: [
+    $currentColor = $colorResult->fetchArray(PDO::FETCH_ASSOC) ?: [
         'main_color' => '#0000ff',
         'accent_color' => '#00ffff',
         'hover_color' => '#00008b'
@@ -133,14 +133,14 @@ if (isset($_POST['main_color']) || isset($_POST['accent_color']) || isset($_POST
 
     // Delete & Insert
     $delColors = $db->prepare('DELETE FROM custom_colors WHERE user_id = :userId');
-    $delColors->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $delColors->bindValue(':userId', $userId, PDO::PARAM_INT);
     $delColors->execute();
 
     $insColors = $db->prepare('INSERT INTO custom_colors (main_color, accent_color, hover_color, user_id) VALUES (:main_color, :accent_color, :hover_color, :userId)');
-    $insColors->bindValue(':main_color', $main_color, SQLITE3_TEXT);
-    $insColors->bindValue(':accent_color', $accent_color, SQLITE3_TEXT);
-    $insColors->bindValue(':hover_color', $hover_color, SQLITE3_TEXT);
-    $insColors->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $insColors->bindValue(':main_color', $main_color, PDO::PARAM_STR);
+    $insColors->bindValue(':accent_color', $accent_color, PDO::PARAM_STR);
+    $insColors->bindValue(':hover_color', $hover_color, PDO::PARAM_STR);
+    $insColors->bindValue(':userId', $userId, PDO::PARAM_INT);
     $insColors->execute();
 }
 
@@ -168,7 +168,7 @@ foreach ($binarySettings as $postKey => $dbCol) {
             $updateFields[] = "`$dbCol` = :$postKey";
             $params[$postKey] = [
                 'val' => ($val === '1' || $val === 1) ? 1 : 0,
-                'type' => SQLITE3_INTEGER
+                'type' => PDO::PARAM_INT
             ];
         } else {
             echo json_encode([
@@ -187,7 +187,7 @@ if (isset($_POST['dark_theme'])) {
         $updateFields[] = "`dark_theme` = :dark_theme";
         $params['dark_theme'] = [
             'val' => intval($darkTheme),
-            'type' => SQLITE3_INTEGER
+            'type' => PDO::PARAM_INT
         ];
     } else {
         echo json_encode([
@@ -206,7 +206,7 @@ if (isset($_POST['color_theme'])) {
         $updateFields[] = "`color_theme` = :color_theme";
         $params['color_theme'] = [
             'val' => $colorTheme,
-            'type' => SQLITE3_TEXT
+            'type' => PDO::PARAM_STR
         ];
     } else {
         echo json_encode([
@@ -233,7 +233,7 @@ if (isset($_POST['upcoming_payments_limit'])) {
     $updateFields[] = '`upcoming_payments_limit` = :upcoming_payments_limit';
     $params['upcoming_payments_limit'] = [
         'val' => $upcomingPaymentsLimit,
-        'type' => SQLITE3_INTEGER
+        'type' => PDO::PARAM_INT
     ];
 }
 
@@ -241,7 +241,7 @@ if (isset($_POST['upcoming_payments_limit'])) {
 if (!empty($updateFields)) {
     $sqlUpdate = "UPDATE settings SET " . implode(', ', $updateFields) . " WHERE user_id = :userId";
     $stmtUpdate = $db->prepare($sqlUpdate);
-    $stmtUpdate->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmtUpdate->bindValue(':userId', $userId, PDO::PARAM_INT);
     foreach ($params as $paramKey => $paramData) {
         $stmtUpdate->bindValue(':' . $paramKey, $paramData['val'], $paramData['type']);
     }

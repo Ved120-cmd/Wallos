@@ -109,18 +109,18 @@ if ($sort != "next_payment") {
 $sql .= " ORDER BY " . implode(", ", $orderByClauses);
 
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
 if (!empty($params)) {
   foreach ($params as $key => $value) {
-    $stmt->bindValue($key, $value, SQLITE3_INTEGER);
+    $stmt->bindValue($key, $value, PDO::PARAM_INT);
   }
 }
 
 $result = $stmt->execute();
 if ($result) {
   $subscriptions = array();
-  while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+  while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $subscriptions[] = $row;
   }
 }
@@ -276,12 +276,12 @@ $subscriptionsView = (isset($_COOKIE['subscriptionsView']) && $_COOKIE['subscrip
     }
 
     $googleSearchEnabled = false;
-    if ($db->querySingle("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='google_search'") > 0) {
+    if ($db->querySingle("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'google_search'") > 0) {
       $googleSearchStmt = $db->prepare("SELECT COUNT(*) AS count FROM google_search WHERE user_id = :userId AND api_key != ''");
-      $googleSearchStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+      $googleSearchStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
       $googleSearchResult = $googleSearchStmt->execute();
       if ($googleSearchResult) {
-        $googleSearchRow = $googleSearchResult->fetchArray(SQLITE3_ASSOC);
+        $googleSearchRow = $googleSearchResult->fetchArray(PDO::FETCH_ASSOC);
         $googleSearchEnabled = $googleSearchRow && $googleSearchRow['count'] > 0;
       }
     }

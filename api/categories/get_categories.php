@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     // If the user is not found, return an error
     if (!$user) {
@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $categories = [];
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $categories[] = $row;
     }
 
@@ -94,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
         $stmt->bindValue(':categoryId', $categoryId);
         $stmt->bindValue(':userId', $userId);
         $result = $stmt->execute();
-        $count = $result->fetchArray(SQLITE3_ASSOC);
+        $count = $result->fetchArray(PDO::FETCH_ASSOC);
         if ($count['count'] > 0) {
             $categories[$key]['in_use'] = true;
         } else {

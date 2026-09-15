@@ -24,14 +24,14 @@ function wallos_get_ssrf_allowlist_env_value()
  * local_webhook_notifications_allowlist value. Also returns whether standard
  * (non-admin) users are allowed to target hosts on that allowlist.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @return array{allowlist: string[], raw: string, is_managed: bool, allow_standard_users: bool}
  */
 function wallos_get_effective_ssrf_allowlist($db)
 {
     $stmt = $db->prepare('SELECT local_webhook_notifications_allowlist, allow_standard_users_local_webhooks FROM admin LIMIT 1');
     $result = $stmt->execute();
-    $row = $result ? $result->fetchArray(SQLITE3_ASSOC) : false;
+    $row = $result ? $result->fetchArray(PDO::FETCH_ASSOC) : false;
     $dbValue = $row ? $row['local_webhook_notifications_allowlist'] : '';
     $allowStandardUsers = $row ? (bool) $row['allow_standard_users_local_webhooks'] : false;
 
@@ -144,7 +144,7 @@ function wallos_ip_is_private_or_reserved($ip) {
  * Validates a webhook URL against SSRF attacks and checks the admin allowlist.
  * If validation fails, it kills the script and outputs a JSON error response.
  * * @param string $url The destination URL to check
- * @param SQLite3 $db The database connection
+ * @param WallosDatabase $db The database connection
  * @param array $i18n The translation array
  * @return array Returns an array with ['host', 'ip', 'port'] for cURL hardening
  */
@@ -218,7 +218,7 @@ function validate_webhook_url_for_ssrf($url, $db, $i18n, $userId = null) {
  *
  * @param string  $host Hostname or IP
  * @param int     $port SMTP port (used for allowlist host:port matching)
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @return bool
  */
 function validate_smtp_host($host, $port, $db) {
@@ -264,7 +264,7 @@ function validate_smtp_host($host, $port, $db) {
  * was validated in this same call, with no second DNS lookup in between.
  *
  * @param string  $url
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @return array|false ['host', 'ip', 'ips', 'port'] on success, false on failure
  */
 function validate_oidc_endpoint_url($url, $db) {
@@ -331,7 +331,7 @@ function validate_oidc_endpoint_url($url, $db) {
  * Respects the admin allowlist for private IPs, just like the main function.
  *
  * @param string $url The destination URL to check
- * @param SQLite3 $db The database connection
+ * @param WallosDatabase $db The database connection
  * @return array|false
  */
 function is_url_safe_for_ssrf($url, $db, $userId = null) {

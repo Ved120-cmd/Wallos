@@ -16,8 +16,8 @@ if (!isset($data['value']) || !is_bool($data['value'])) {
 $week_starts_sunday = $data['value'] ? 1 : 0;
 
 $stmt = $db->prepare('UPDATE settings SET week_starts_sunday = :week_starts_sunday WHERE user_id = :userId');
-$stmt->bindParam(':week_starts_sunday', $week_starts_sunday, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':week_starts_sunday', $week_starts_sunday, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

@@ -83,9 +83,9 @@ if ($referenceDateRaw !== null && $referenceDateRaw !== '') {
 
 $sql = "SELECT id, main_currency, period_budget, budget_period_type, budget_period_anchor_date FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result ? $result->fetchArray(SQLITE3_ASSOC) : false;
+$user = $result ? $result->fetchArray(PDO::FETCH_ASSOC) : false;
 
 if (!$user) {
     echo json_encode([
@@ -104,10 +104,10 @@ $activePeriod = getActiveBudgetPeriod($referenceDate, $periodType, $anchorDate);
 
 $subsSql = "SELECT * FROM subscriptions WHERE user_id = :userId AND inactive = 0";
 $subsStmt = $db->prepare($subsSql);
-$subsStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$subsStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $subsResult = $subsStmt->execute();
 $subscriptions = [];
-while ($subsResult && ($subscription = $subsResult->fetchArray(SQLITE3_ASSOC))) {
+while ($subsResult && ($subscription = $subsResult->fetchArray(PDO::FETCH_ASSOC))) {
     $subscriptions[] = $subscription;
 }
 
@@ -135,10 +135,10 @@ $currencyCode = null;
 $currencySymbol = null;
 $currencySql = "SELECT code, symbol FROM currencies WHERE id = :currencyId AND user_id = :userId LIMIT 1";
 $currencyStmt = $db->prepare($currencySql);
-$currencyStmt->bindValue(':currencyId', (int) $user['main_currency'], SQLITE3_INTEGER);
-$currencyStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$currencyStmt->bindValue(':currencyId', (int) $user['main_currency'], PDO::PARAM_INT);
+$currencyStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $currencyResult = $currencyStmt->execute();
-$currency = $currencyResult ? $currencyResult->fetchArray(SQLITE3_ASSOC) : false;
+$currency = $currencyResult ? $currencyResult->fetchArray(PDO::FETCH_ASSOC) : false;
 
 if ($currency) {
     $currencyCode = $currency['code'];

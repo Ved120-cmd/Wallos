@@ -15,7 +15,10 @@ $currentDateString = $currentDate->format('Y-m-d');
 $cycles = array();
 $query = "SELECT * FROM cycles";
 $result = $db->query($query);
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+if ($result === false) {
+    throw new RuntimeException('Unable to load subscription cycles: ' . $db->lastErrorMsg());
+}
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $cycleId = $row['id'];
     $cycles[$cycleId] = $row;
 }
@@ -25,7 +28,11 @@ $stmt = $db->prepare($query);
 $stmt->bindValue(':currentDate', $currentDate->format('Y-m-d'));
 $result = $stmt->execute();
 
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+if ($result === false) {
+    throw new RuntimeException('Unable to load subscriptions for payment update: ' . $db->lastErrorMsg());
+}
+
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $subscriptionId = $row['id'];
     $nextPaymentDate = new DateTime($row['next_payment']);
     $frequency = $row['frequency'];
@@ -66,7 +73,7 @@ $deleteResult = $deleteStmt->execute();
 
 $query = "INSERT INTO last_update_next_payment_date (date) VALUES (:formattedDate)";
 $stmt = $db->prepare($query);
-$stmt->bindParam(':formattedDate', $currentDateString, SQLITE3_TEXT);
+$stmt->bindParam(':formattedDate', $currentDateString, PDO::PARAM_STR);
 $result = $stmt->execute();
 
 echo "Updated next payment dates";

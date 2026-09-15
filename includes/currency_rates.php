@@ -18,7 +18,7 @@
  * The map is cached per database connection, so a second connection — a test,
  * or a job that reopens the database — never sees another connection's rates.
  *
- * @param SQLite3  $db
+ * @param WallosDatabase  $db
  * @param int|null $userId
  * @return array<int, float>
  */
@@ -45,12 +45,12 @@ function wallos_currency_rates($db, $userId = null)
         $stmt = $db->prepare('SELECT id, rate FROM currencies');
     } else {
         $stmt = $db->prepare('SELECT id, rate FROM currencies WHERE user_id = :userId');
-        $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     }
 
     $result = $stmt ? $stmt->execute() : false;
 
-    while ($result && $row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($result && $row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $rates[(int) $row['id']] = (float) $row['rate'];
     }
 
@@ -68,7 +68,7 @@ function wallos_currency_rates($db, $userId = null)
  *
  * @param float|int|string $price
  * @param int              $currencyId
- * @param SQLite3          $db
+ * @param WallosDatabase          $db
  * @param int|null         $userId
  * @return float
  */

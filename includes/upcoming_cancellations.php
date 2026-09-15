@@ -7,7 +7,7 @@
  * and the subscription form clears their cancellation date. The cancellation
  * notification cron applies the same rule.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @return array
  */
@@ -19,14 +19,14 @@ function get_upcoming_cancellations($db, $userId)
           AND inactive = 0
           AND cancellation_date IS NOT NULL
           AND cancellation_date != ''
-          AND cancellation_date >= date('now')
+          AND cancellation_date >= CURRENT_DATE
           AND cycle != 5
         ORDER BY cancellation_date ASC");
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $subscriptions = [];
-    while ($result && ($row = $result->fetchArray(SQLITE3_ASSOC))) {
+    while ($result && ($row = $result->fetchArray(PDO::FETCH_ASSOC))) {
         $subscriptions[] = $row;
     }
 
@@ -40,7 +40,7 @@ function get_upcoming_cancellations($db, $userId)
  * Expects getPricePerMonth() and getPriceConverted() from stats_calculations.php.
  *
  * @param array   $cancellations rows from get_upcoming_cancellations()
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @return float
  */

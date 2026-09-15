@@ -71,9 +71,9 @@ if ($action === 'verify') {
 
         // Check if user already has TOTP enabled
         $stmt = $db->prepare("SELECT totp_enabled FROM user WHERE id = :user_id");
-        $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $row = $result->fetchArray(PDO::FETCH_ASSOC);
         if ($row['totp_enabled'] == 1) {
             die(json_encode([
                 "success" => false,
@@ -105,14 +105,14 @@ if ($action === 'verify') {
             // will ever work again. Before this, all three writes were
             // discarded and success was reported unconditionally, so that
             // account was told 2FA was on and given the codes to prove it.
-            $enrolled = $db->exec('BEGIN') !== false;
+            $enrolled = $db->beginTransaction() !== false;
 
             if ($enrolled) {
                 $stmt = $db->prepare("DELETE FROM totp WHERE user_id = :user_id");
                 $enrolled = $stmt !== false;
 
                 if ($enrolled) {
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                     $enrolled = $stmt->execute() !== false;
                 }
             }
@@ -122,13 +122,13 @@ if ($action === 'verify') {
                 $enrolled = $stmt !== false;
 
                 if ($enrolled) {
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
-                    $stmt->bindValue(':totp_secret', $secret, SQLITE3_TEXT);
-                    $stmt->bindValue(':backup_codes', json_encode($backupCodes), SQLITE3_TEXT);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+                    $stmt->bindValue(':totp_secret', $secret, PDO::PARAM_STR);
+                    $stmt->bindValue(':backup_codes', json_encode($backupCodes), PDO::PARAM_STR);
                     // Store the current TOTP time-step (not a raw timestamp): the code
                     // just verified above counts as used, so it cannot be replayed as the
                     // first login code. totp.php compares against this same step counter.
-                    $stmt->bindValue(':last_totp_used', intdiv(time(), 30), SQLITE3_INTEGER);
+                    $stmt->bindValue(':last_totp_used', intdiv(time(), 30), PDO::PARAM_INT);
                     $enrolled = $stmt->execute() !== false;
                 }
             }
@@ -139,13 +139,13 @@ if ($action === 'verify') {
                 $enrolled = $stmt !== false;
 
                 if ($enrolled) {
-                    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+                    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                     $enrolled = $stmt->execute() !== false;
                 }
             }
 
-            if (!$enrolled || $db->exec('COMMIT') === false) {
-                $db->exec('ROLLBACK');
+            if (!$enrolled || $db->commit() === false) {
+                $db->rollBack();
 
                 error_log('Wallos: could not enable 2FA for user ' . (int) $userId
                     . ', nothing was changed: ' . $db->lastErrorMsg());

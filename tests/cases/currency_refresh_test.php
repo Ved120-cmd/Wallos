@@ -9,7 +9,7 @@
 */
 
 /**
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @param string  $code
  * @return float
@@ -17,9 +17,9 @@
 function refresh_rate($db, $userId, $code)
 {
     $stmt = $db->prepare('SELECT rate FROM currencies WHERE user_id = :userId AND code = :code');
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
-    $stmt->bindValue(':code', $code, SQLITE3_TEXT);
-    $row = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':code', $code, PDO::PARAM_STR);
+    $row = $stmt->execute()->fetchArray(PDO::FETCH_ASSOC);
 
     return $row ? (float) $row['rate'] : 0.0;
 }
@@ -30,17 +30,17 @@ wallos_test('an interrupted refresh leaves the previous rates', function () {
 
     $before = [refresh_rate($db, 1, 'EUR'), refresh_rate($db, 1, 'USD')];
 
-    $db->exec('BEGIN');
+    $db->beginTransaction();
 
     $stmt = $db->prepare('UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId');
-    $stmt->bindValue(':rate', 7.0, SQLITE3_TEXT);
-    $stmt->bindValue(':code', 'EUR', SQLITE3_TEXT);
-    $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
+    $stmt->bindValue(':rate', 7.0, PDO::PARAM_STR);
+    $stmt->bindValue(':code', 'EUR', PDO::PARAM_STR);
+    $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
     $stmt->execute();
     $stmt->reset();
 
     // The provider response breaks off here: the second currency never lands.
-    $db->exec('ROLLBACK');
+    $db->rollBack();
 
     assert_same($before[0], refresh_rate($db, 1, 'EUR'), 'the first rate is restored');
     assert_same($before[1], refresh_rate($db, 1, 'USD'), 'the second rate is unchanged');
@@ -52,18 +52,18 @@ wallos_test('a completed refresh commits every rate together', function () {
     $db = wallos_test_open_database();
     wallos_test_create_user($db, 1, 'alice');
 
-    $db->exec('BEGIN');
+    $db->beginTransaction();
 
     $stmt = $db->prepare('UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId');
     foreach (['EUR' => 1.0, 'USD' => 3.0] as $code => $rate) {
-        $stmt->bindValue(':rate', $rate, SQLITE3_TEXT);
-        $stmt->bindValue(':code', $code, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
+        $stmt->bindValue(':rate', $rate, PDO::PARAM_STR);
+        $stmt->bindValue(':code', $code, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
         $stmt->execute();
         $stmt->reset();
     }
 
-    $db->exec('COMMIT');
+    $db->commit();
 
     assert_same(1.0, refresh_rate($db, 1, 'EUR'), 'the first rate is stored');
     assert_same(3.0, refresh_rate($db, 1, 'USD'), 'the second rate is stored');
@@ -79,9 +79,9 @@ wallos_test('one prepared statement serves the whole rate loop', function () {
 
     $stmt = $db->prepare('UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId');
     foreach (['EUR', 'USD', 'EUR', 'USD', 'EUR'] as $index => $code) {
-        $stmt->bindValue(':rate', 1.0 + $index, SQLITE3_TEXT);
-        $stmt->bindValue(':code', $code, SQLITE3_TEXT);
-        $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
+        $stmt->bindValue(':rate', 1.0 + $index, PDO::PARAM_STR);
+        $stmt->bindValue(':code', $code, PDO::PARAM_STR);
+        $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
         $stmt->execute();
         $stmt->reset();
     }

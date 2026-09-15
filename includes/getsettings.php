@@ -4,10 +4,10 @@ require_once __DIR__ . '/theme_helpers.php';
 
 $query = "SELECT * FROM settings WHERE user_id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
-$settings = $result->fetchArray(SQLITE3_ASSOC);
+$settings = $result->fetchArray(PDO::FETCH_ASSOC);
 if ($settings !== false) {
     $themeMapping = array(0 => 'light', 1 => 'dark', 2 => 'automatic');
     $themeKey = isset($settings['dark_theme']) ? $settings['dark_theme'] : 2;
@@ -36,9 +36,9 @@ if ($settings !== false) {
 
 $query = "SELECT * FROM custom_colors WHERE user_id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$customColors = $result->fetchArray(SQLITE3_ASSOC);
+$customColors = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($customColors !== false) {
     $settings['customColors'] = $customColors;
@@ -46,16 +46,16 @@ if ($customColors !== false) {
 
 $query = "SELECT * FROM custom_css_style WHERE user_id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$customCss = $result->fetchArray(SQLITE3_ASSOC);
+$customCss = $result->fetchArray(PDO::FETCH_ASSOC);
 if ($customCss !== false) {
     $settings['customCss'] = $customCss['css'];
 }
 
 $query = "SELECT * FROM admin";
 $result = $db->query($query);
-$adminSettings = $result->fetchArray(SQLITE3_ASSOC);
+$adminSettings = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($adminSettings !== false) {
     $settings['disableLogin'] = $adminSettings['login_disabled'];

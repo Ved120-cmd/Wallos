@@ -11,7 +11,7 @@ $currentDateString = $currentDate->format('Y-m-d');
 $cycles = array();
 $query = "SELECT * FROM cycles";
 $result = $db->query($query);
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $cycleId = $row['id'];
     $cycles[$cycleId] = $row;
 }
@@ -19,10 +19,10 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 $subscriptionId = $data["id"];
 $query = "SELECT * FROM subscriptions WHERE id = :id AND user_id = :user_id AND auto_renew = 0 AND cycle != 5";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':id', $subscriptionId, SQLITE3_INTEGER);
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':id', $subscriptionId, PDO::PARAM_INT);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$subscriptionToRenew = $result->fetchArray(SQLITE3_ASSOC);
+$subscriptionToRenew = $result->fetchArray(PDO::FETCH_ASSOC);
 if ($subscriptionToRenew === false) {
     die(json_encode([
         "success" => false,

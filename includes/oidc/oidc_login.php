@@ -22,8 +22,8 @@ $cookieExpire = time() + (86400 * 30); // 30 days
 $token = bin2hex(random_bytes(32));
 $addLoginTokens = "INSERT INTO login_tokens (user_id, token) VALUES (:userId, :token)";
 $addLoginTokensStmt = $db->prepare($addLoginTokens);
-$addLoginTokensStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
-$addLoginTokensStmt->bindParam(':token', $token, SQLITE3_TEXT);
+$addLoginTokensStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+$addLoginTokensStmt->bindParam(':token', $token, PDO::PARAM_STR);
 $addLoginTokensStmt->execute();
 
 $_SESSION['token'] = $token;
@@ -51,9 +51,9 @@ if (!isset($_COOKIE['sortOrder'])) {
 // Set color theme
 $query = "SELECT color_theme FROM settings WHERE user_id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$settings = $result->fetchArray(SQLITE3_ASSOC);
+$settings = $result->fetchArray(PDO::FETCH_ASSOC);
 setcookie('colorTheme', $settings['color_theme'], [
     'expires' => $cookieExpire,
     'samesite' => 'Lax'

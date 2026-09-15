@@ -44,36 +44,36 @@ if (!$aiSettings) {
 
 // Categories
 $stmt = $db->prepare("SELECT * FROM categories WHERE user_id = :user_id");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $categories = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $categories[$row['id']] = $row;
 }
 
 // Currencies
 $stmt = $db->prepare("SELECT * FROM currencies WHERE user_id = :user_id");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $currencies = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $currencies[$row['id']] = $row;
 }
 
 // Household members
 $stmt = $db->prepare("SELECT * FROM household WHERE user_id = :user_id");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $members = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $members[$row['id']] = $row;
 }
 
 // User language
 $stmt = $db->prepare("SELECT language FROM user WHERE id = :user_id");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$userLanguage = $result->fetchArray(SQLITE3_ASSOC)['language'] ?? 'en';
+$userLanguage = $result->fetchArray(PDO::FETCH_ASSOC)['language'] ?? 'en';
 
 // Language name
 require_once '../../includes/i18n/languages.php';
@@ -81,11 +81,11 @@ $userLanguageName = $languages[$userLanguage]['name'] ?? 'English';
 
 // Subscriptions
 $stmt = $db->prepare("SELECT * FROM subscriptions WHERE user_id = :user_id AND inactive = 0");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 $subscriptions = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $subscriptions[] = $row;
 }
 
@@ -206,7 +206,7 @@ if (is_array($recommendations)) {
 if (!empty($recommendations)) {
     // Clear old recommendations
     $stmt = $db->prepare("DELETE FROM ai_recommendations WHERE user_id = :user_id");
-    $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
     $stmt->execute();
 
     // Insert new recommendations
@@ -216,11 +216,11 @@ if (!empty($recommendations)) {
     ");
 
     foreach ($recommendations as $rec) {
-        $insert->bindValue(':user_id', $userId, SQLITE3_INTEGER);
-        $insert->bindValue(':type', 'subscription', SQLITE3_TEXT);
-        $insert->bindValue(':title', $rec['title'] ?? '', SQLITE3_TEXT);
-        $insert->bindValue(':description', $rec['description'] ?? '', SQLITE3_TEXT);
-        $insert->bindValue(':savings', $rec['savings'] ?? '', SQLITE3_TEXT);
+        $insert->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $insert->bindValue(':type', 'subscription', PDO::PARAM_STR);
+        $insert->bindValue(':title', $rec['title'] ?? '', PDO::PARAM_STR);
+        $insert->bindValue(':description', $rec['description'] ?? '', PDO::PARAM_STR);
+        $insert->bindValue(':savings', $rec['savings'] ?? '', PDO::PARAM_STR);
         $insert->execute();
     }
 

@@ -18,17 +18,17 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 $query = "INSERT INTO user (username, email, oidc_sub, main_currency, avatar, language, budget, firstname, lastname, password, api_key)
           VALUES (:username, :email, :oidc_sub, :main_currency, :avatar, :language, :budget, :firstname, :lastname, :password, :api_key)";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':username', $username, SQLITE3_TEXT);
-$stmt->bindValue(':email', $email, SQLITE3_TEXT);
-$stmt->bindValue(':oidc_sub', $oidcSub, SQLITE3_TEXT);
-$stmt->bindValue(':main_currency', $main_currency_id, SQLITE3_INTEGER);
-$stmt->bindValue(':avatar', $avatar, SQLITE3_TEXT);
-$stmt->bindValue(':language', $language, SQLITE3_TEXT);
-$stmt->bindValue(':budget', $budget, SQLITE3_INTEGER);
-$stmt->bindValue(':firstname', $firstname, SQLITE3_TEXT);
-$stmt->bindValue(':lastname', $lastname, SQLITE3_TEXT);
-$stmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
-$stmt->bindValue(':api_key', bin2hex(random_bytes(32)), SQLITE3_TEXT);
+$stmt->bindValue(':username', $username, PDO::PARAM_STR);
+$stmt->bindValue(':email', $email, PDO::PARAM_STR);
+$stmt->bindValue(':oidc_sub', $oidcSub, PDO::PARAM_STR);
+$stmt->bindValue(':main_currency', $main_currency_id, PDO::PARAM_INT);
+$stmt->bindValue(':avatar', $avatar, PDO::PARAM_STR);
+$stmt->bindValue(':language', $language, PDO::PARAM_STR);
+$stmt->bindValue(':budget', $budget, PDO::PARAM_INT);
+$stmt->bindValue(':firstname', $firstname, PDO::PARAM_STR);
+$stmt->bindValue(':lastname', $lastname, PDO::PARAM_STR);
+$stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+$stmt->bindValue(':api_key', bin2hex(random_bytes(32)), PDO::PARAM_STR);
 
 if (!$stmt->execute()) {
     die("Failed to create user");
@@ -36,15 +36,15 @@ if (!$stmt->execute()) {
 
 // Get the user data into $userData
 $stmt = $db->prepare("SELECT * FROM user WHERE username = :username");
-$stmt->bindValue(':username', $username, SQLITE3_TEXT);
+$stmt->bindValue(':username', $username, PDO::PARAM_STR);
 $result = $stmt->execute();
-$userData = $result->fetchArray(SQLITE3_ASSOC);
+$userData = $result->fetchArray(PDO::FETCH_ASSOC);
 $newUserId = $userData['id'];
 
 // Household
 $stmt = $db->prepare("INSERT INTO household (name, user_id) VALUES (:name, :user_id)");
-$stmt->bindValue(':name', $username, SQLITE3_TEXT);
-$stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+$stmt->bindValue(':name', $username, PDO::PARAM_STR);
+$stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
 $stmt->execute();
 
 // Categories
@@ -57,9 +57,9 @@ $categories = [
 
 $stmt = $db->prepare("INSERT INTO categories (name, \"order\", user_id) VALUES (:name, :order, :user_id)");
 foreach ($categories as $index => $name) {
-    $stmt->bindValue(':name', $name, SQLITE3_TEXT);
-    $stmt->bindValue(':order', $index + 1, SQLITE3_INTEGER);
-    $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+    $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+    $stmt->bindValue(':order', $index + 1, PDO::PARAM_INT);
+    $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
     $stmt->execute();
 }
 
@@ -100,10 +100,10 @@ $payment_methods = [
 
 $stmt = $db->prepare("INSERT INTO payment_methods (name, icon, \"order\", user_id) VALUES (:name, :icon, :order, :user_id)");
 foreach ($payment_methods as $index => $method) {
-    $stmt->bindValue(':name', $method['name'], SQLITE3_TEXT);
-    $stmt->bindValue(':icon', $method['icon'], SQLITE3_TEXT);
-    $stmt->bindValue(':order', $index + 1, SQLITE3_INTEGER);
-    $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+    $stmt->bindValue(':name', $method['name'], PDO::PARAM_STR);
+    $stmt->bindValue(':icon', $method['icon'], PDO::PARAM_STR);
+    $stmt->bindValue(':order', $index + 1, PDO::PARAM_INT);
+    $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
     $stmt->execute();
 }
 
@@ -148,23 +148,23 @@ $currencies = [
 $stmt = $db->prepare("INSERT INTO currencies (name, symbol, code, rate, user_id) 
                       VALUES (:name, :symbol, :code, :rate, :user_id)");
 foreach ($currencies as $currency) {
-    $stmt->bindValue(':name', $currency['name'], SQLITE3_TEXT);
-    $stmt->bindValue(':symbol', $currency['symbol'], SQLITE3_TEXT);
-    $stmt->bindValue(':code', $currency['code'], SQLITE3_TEXT);
-    $stmt->bindValue(':rate', 1.0, SQLITE3_FLOAT);
-    $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+    $stmt->bindValue(':name', $currency['name'], PDO::PARAM_STR);
+    $stmt->bindValue(':symbol', $currency['symbol'], PDO::PARAM_STR);
+    $stmt->bindValue(':code', $currency['code'], PDO::PARAM_STR);
+    $stmt->bindValue(':rate', 1.0, PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
     $stmt->execute();
 }
 
 // Get actual Euro currency ID
 $stmt = $db->prepare("SELECT id FROM currencies WHERE code = 'EUR' AND user_id = :user_id");
-$stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$currency = $result->fetchArray(SQLITE3_ASSOC);
+$currency = $result->fetchArray(PDO::FETCH_ASSOC);
 if ($currency) {
     $stmt = $db->prepare("UPDATE user SET main_currency = :main_currency WHERE id = :user_id");
-    $stmt->bindValue(':main_currency', $currency['id'], SQLITE3_INTEGER);
-    $stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+    $stmt->bindValue(':main_currency', $currency['id'], PDO::PARAM_INT);
+    $stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
     $stmt->execute();
 }
 
@@ -173,7 +173,7 @@ $userData['main_currency'] = $currency['id'];
 // Insert settings
 $stmt = $db->prepare("INSERT INTO settings (dark_theme, monthly_price, convert_currency, remove_background, color_theme, hide_disabled, user_id, disabled_to_bottom, show_original_price, mobile_nav, week_starts_sunday) 
                       VALUES (2, 0, 0, 0, 'blue', 0, :user_id, 0, 0, 0, 0)");
-$stmt->bindValue(':user_id', $newUserId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $newUserId, PDO::PARAM_INT);
 $stmt->execute();
 
 // Log the user in

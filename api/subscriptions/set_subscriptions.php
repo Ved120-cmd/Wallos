@@ -75,9 +75,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -449,8 +449,8 @@ switch ($action) {
         // Validate Foreign Keys
         // Currency
         $currStmt = $db->prepare("SELECT id FROM currencies WHERE id = :id AND user_id = :userId");
-        $currStmt->bindValue(':id', $currencyId, SQLITE3_INTEGER);
-        $currStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $currStmt->bindValue(':id', $currencyId, PDO::PARAM_INT);
+        $currStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $currRes = $currStmt->execute()->fetchArray();
         if (!$currRes) {
             echo json_encode([
@@ -465,8 +465,8 @@ switch ($action) {
         if ($categoryId !== null) {
             $categoryId = intval($categoryId);
             $catStmt = $db->prepare("SELECT id FROM categories WHERE id = :id AND user_id = :userId");
-            $catStmt->bindValue(':id', $categoryId, SQLITE3_INTEGER);
-            $catStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $catStmt->bindValue(':id', $categoryId, PDO::PARAM_INT);
+            $catStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $catRes = $catStmt->execute()->fetchArray();
             if (!$catRes) {
                 echo json_encode([
@@ -482,8 +482,8 @@ switch ($action) {
         if ($payerUserId !== null) {
             $payerUserId = intval($payerUserId);
             $payerStmt = $db->prepare("SELECT id FROM household WHERE id = :id AND user_id = :userId");
-            $payerStmt->bindValue(':id', $payerUserId, SQLITE3_INTEGER);
-            $payerStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $payerStmt->bindValue(':id', $payerUserId, PDO::PARAM_INT);
+            $payerStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $payerRes = $payerStmt->execute()->fetchArray();
             if (!$payerRes) {
                 echo json_encode([
@@ -499,8 +499,8 @@ switch ($action) {
         if ($paymentMethodId !== null) {
             $paymentMethodId = intval($paymentMethodId);
             $pmStmt = $db->prepare("SELECT id FROM payment_methods WHERE id = :id AND (user_id = :userId OR user_id = 0 OR user_id IS NULL)");
-            $pmStmt->bindValue(':id', $paymentMethodId, SQLITE3_INTEGER);
-            $pmStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $pmStmt->bindValue(':id', $paymentMethodId, PDO::PARAM_INT);
+            $pmStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $pmRes = $pmStmt->execute()->fetchArray();
             if (!$pmRes) {
                 echo json_encode([
@@ -516,8 +516,8 @@ switch ($action) {
         if ($replacementSubscriptionId !== null) {
             $replacementSubscriptionId = intval($replacementSubscriptionId);
             $repStmt = $db->prepare("SELECT id FROM subscriptions WHERE id = :id AND user_id = :userId");
-            $repStmt->bindValue(':id', $replacementSubscriptionId, SQLITE3_INTEGER);
-            $repStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $repStmt->bindValue(':id', $replacementSubscriptionId, PDO::PARAM_INT);
+            $repStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $repRes = $repStmt->execute()->fetchArray();
             if (!$repRes) {
                 $replacementSubscriptionId = null;
@@ -560,28 +560,28 @@ switch ($action) {
                             :autoRenew, :startDate, :logoTextColor, :logoVariant
                         )";
         $stmtInsert = $db->prepare($sqlInsert);
-        $stmtInsert->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':logo', $logo, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':logoTextColor', $logoTextColor, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':logoVariant', $logoVariant, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':price', $price, SQLITE3_FLOAT);
-        $stmtInsert->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':nextPayment', $nextPayment, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':cycle', $cycle, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':frequency', $frequency, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':notes', $notes, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':paymentMethodId', $paymentMethodId, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':payerUserId', $payerUserId, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':notify', $notify, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':inactive', $inactive, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':url', $url, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':notifyDaysBefore', $notifyDaysBefore, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':cancellationDate', $cancellationDate, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':replacement_subscription_id', $replacementSubscriptionId, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':autoRenew', $autoRenew, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':startDate', $startDate, SQLITE3_TEXT);
+        $stmtInsert->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':logo', $logo, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':logoTextColor', $logoTextColor, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':logoVariant', $logoVariant, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':price', $price, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':nextPayment', $nextPayment, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':cycle', $cycle, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':frequency', $frequency, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':notes', $notes, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':paymentMethodId', $paymentMethodId, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':payerUserId', $payerUserId, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':notify', $notify, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':inactive', $inactive, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':url', $url, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':notifyDaysBefore', $notifyDaysBefore, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':cancellationDate', $cancellationDate, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':replacement_subscription_id', $replacementSubscriptionId, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':autoRenew', $autoRenew, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':startDate', $startDate, PDO::PARAM_STR);
 
         if ($stmtInsert->execute()) {
             $addResponse = [
@@ -618,10 +618,10 @@ switch ($action) {
         // Fetch current subscription
         $subSql = "SELECT * FROM subscriptions WHERE id = :subId AND user_id = :userId";
         $subStmt = $db->prepare($subSql);
-        $subStmt->bindValue(':subId', $subscriptionId, SQLITE3_INTEGER);
-        $subStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $subStmt->bindValue(':subId', $subscriptionId, PDO::PARAM_INT);
+        $subStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $subResult = $subStmt->execute();
-        $subscription = $subResult->fetchArray(SQLITE3_ASSOC);
+        $subscription = $subResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$subscription) {
             echo json_encode([
@@ -743,8 +743,8 @@ switch ($action) {
         // Validate Foreign Keys
         // Currency
         $currStmt = $db->prepare("SELECT id FROM currencies WHERE id = :id AND user_id = :userId");
-        $currStmt->bindValue(':id', $currencyId, SQLITE3_INTEGER);
-        $currStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $currStmt->bindValue(':id', $currencyId, PDO::PARAM_INT);
+        $currStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $currRes = $currStmt->execute()->fetchArray();
         if (!$currRes) {
             echo json_encode([
@@ -758,8 +758,8 @@ switch ($action) {
         // Category
         if ($categoryId !== null) {
             $catStmt = $db->prepare("SELECT id FROM categories WHERE id = :id AND user_id = :userId");
-            $catStmt->bindValue(':id', $categoryId, SQLITE3_INTEGER);
-            $catStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $catStmt->bindValue(':id', $categoryId, PDO::PARAM_INT);
+            $catStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $catRes = $catStmt->execute()->fetchArray();
             if (!$catRes) {
                 echo json_encode([
@@ -774,8 +774,8 @@ switch ($action) {
         // Payer
         if ($payerUserId !== null) {
             $payerStmt = $db->prepare("SELECT id FROM household WHERE id = :id AND user_id = :userId");
-            $payerStmt->bindValue(':id', $payerUserId, SQLITE3_INTEGER);
-            $payerStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $payerStmt->bindValue(':id', $payerUserId, PDO::PARAM_INT);
+            $payerStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $payerRes = $payerStmt->execute()->fetchArray();
             if (!$payerRes) {
                 echo json_encode([
@@ -790,8 +790,8 @@ switch ($action) {
         // Payment Method
         if ($paymentMethodId !== null) {
             $pmStmt = $db->prepare("SELECT id FROM payment_methods WHERE id = :id AND (user_id = :userId OR user_id = 0 OR user_id IS NULL)");
-            $pmStmt->bindValue(':id', $paymentMethodId, SQLITE3_INTEGER);
-            $pmStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $pmStmt->bindValue(':id', $paymentMethodId, PDO::PARAM_INT);
+            $pmStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $pmRes = $pmStmt->execute()->fetchArray();
             if (!$pmRes) {
                 echo json_encode([
@@ -814,8 +814,8 @@ switch ($action) {
                 exit;
             }
             $repStmt = $db->prepare("SELECT id FROM subscriptions WHERE id = :id AND user_id = :userId");
-            $repStmt->bindValue(':id', $replacementSubscriptionId, SQLITE3_INTEGER);
-            $repStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $repStmt->bindValue(':id', $replacementSubscriptionId, PDO::PARAM_INT);
+            $repStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $repRes = $repStmt->execute()->fetchArray();
             if (!$repRes) {
                 $replacementSubscriptionId = null;
@@ -880,29 +880,29 @@ switch ($action) {
                        WHERE id = :id AND user_id = :userId";
 
         $stmtUpdate = $db->prepare($sqlUpdate);
-        $stmtUpdate->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':logo', $logo, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':logoTextColor', $logoTextColor, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':logoVariant', $logoVariant, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':price', $price, SQLITE3_FLOAT);
-        $stmtUpdate->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':nextPayment', $nextPayment, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':autoRenew', $autoRenew, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':startDate', $startDate, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':cycle', $cycle, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':frequency', $frequency, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':notes', $notes, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':paymentMethodId', $paymentMethodId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':payerUserId', $payerUserId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':notify', $notify, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':inactive', $inactive, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':url', $url, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':notifyDaysBefore', $notifyDaysBefore, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':cancellationDate', $cancellationDate, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':replacement_subscription_id', $replacementSubscriptionId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':id', $subscriptionId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtUpdate->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':logo', $logo, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':logoTextColor', $logoTextColor, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':logoVariant', $logoVariant, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':price', $price, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':nextPayment', $nextPayment, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':autoRenew', $autoRenew, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':cycle', $cycle, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':frequency', $frequency, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':notes', $notes, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':paymentMethodId', $paymentMethodId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':payerUserId', $payerUserId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':notify', $notify, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':inactive', $inactive, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':url', $url, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':notifyDaysBefore', $notifyDaysBefore, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':cancellationDate', $cancellationDate, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':replacement_subscription_id', $replacementSubscriptionId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':id', $subscriptionId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmtUpdate->execute()) {
             $updateResponse = [
@@ -938,10 +938,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM subscriptions WHERE id = :subId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':subId', $subscriptionId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':subId', $subscriptionId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $subscription = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $subscription = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$subscription) {
             echo json_encode([
@@ -955,15 +955,15 @@ switch ($action) {
         // Delete
         $sqlDelete = "DELETE FROM subscriptions WHERE id = :subId AND user_id = :userId";
         $stmtDelete = $db->prepare($sqlDelete);
-        $stmtDelete->bindParam(':subId', $subscriptionId, SQLITE3_INTEGER);
-        $stmtDelete->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtDelete->bindParam(':subId', $subscriptionId, PDO::PARAM_INT);
+        $stmtDelete->bindParam(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmtDelete->execute()) {
             // Nullify replacement_subscription_id references pointing to this subscription
             $queryCascade = "UPDATE subscriptions SET replacement_subscription_id = NULL WHERE replacement_subscription_id = :subId AND user_id = :userId";
             $stmtCascade = $db->prepare($queryCascade);
-            $stmtCascade->bindParam(':subId', $subscriptionId, SQLITE3_INTEGER);
-            $stmtCascade->bindParam(':userId', $userId, SQLITE3_INTEGER);
+            $stmtCascade->bindParam(':subId', $subscriptionId, PDO::PARAM_INT);
+            $stmtCascade->bindParam(':userId', $userId, PDO::PARAM_INT);
             $stmtCascade->execute();
 
             echo json_encode([

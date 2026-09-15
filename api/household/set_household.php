@@ -51,9 +51,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -96,9 +96,9 @@ switch ($action) {
         // Insert
         $sqlInsert = "INSERT INTO household (name, email, user_id) VALUES (:name, :email, :userId)";
         $stmtInsert = $db->prepare($sqlInsert);
-        $stmtInsert->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':email', $email, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtInsert->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultInsert = $stmtInsert->execute();
 
         if ($resultInsert) {
@@ -138,10 +138,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM household WHERE id = :memberId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':memberId', $memberId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':memberId', $memberId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $member = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $member = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$member) {
             echo json_encode([
@@ -155,10 +155,10 @@ switch ($action) {
         // Update
         $sqlUpdate = "UPDATE household SET name = :name, email = :email WHERE id = :memberId AND user_id = :userId";
         $stmtUpdate = $db->prepare($sqlUpdate);
-        $stmtUpdate->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':email', $email, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':memberId', $memberId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtUpdate->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':memberId', $memberId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultUpdate = $stmtUpdate->execute();
 
         if ($resultUpdate) {
@@ -202,10 +202,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM household WHERE id = :memberId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':memberId', $memberId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':memberId', $memberId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $member = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $member = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$member) {
             echo json_encode([
@@ -219,8 +219,8 @@ switch ($action) {
         // Check if in use
         $checkUseSql = "SELECT COUNT(*) FROM subscriptions WHERE payer_user_id = :memberId AND user_id = :userId";
         $checkUseStmt = $db->prepare($checkUseSql);
-        $checkUseStmt->bindParam(':memberId', $memberId, SQLITE3_INTEGER);
-        $checkUseStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkUseStmt->bindParam(':memberId', $memberId, PDO::PARAM_INT);
+        $checkUseStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkUseResult = $checkUseStmt->execute();
         $row = $checkUseResult->fetchArray();
         $count = $row[0] ?? 0;
@@ -237,8 +237,8 @@ switch ($action) {
         // Delete
         $sqlDelete = "DELETE FROM household WHERE id = :memberId AND user_id = :userId";
         $stmtDelete = $db->prepare($sqlDelete);
-        $stmtDelete->bindParam(':memberId', $memberId, SQLITE3_INTEGER);
-        $stmtDelete->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtDelete->bindParam(':memberId', $memberId, PDO::PARAM_INT);
+        $stmtDelete->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultDelete = $stmtDelete->execute();
 
         if ($resultDelete) {

@@ -17,7 +17,7 @@ if (wallos_has_oidc_env_value('OIDC_ENABLED')) {
 }
 
 $stmt = $db->prepare('UPDATE admin SET oidc_oauth_enabled = :oidcEnabled WHERE id = 1');
-$stmt->bindParam(':oidcEnabled', $oidcEnabled, SQLITE3_INTEGER);
+$stmt->bindParam(':oidcEnabled', $oidcEnabled, PDO::PARAM_INT);
 $stmt->execute();
 
 if ($db->changes() > 0) {

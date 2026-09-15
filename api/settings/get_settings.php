@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     // If the user is not found, return an error
     if (!$user) {
@@ -83,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $settings = $result->fetchArray(SQLITE3_ASSOC);
+    $settings = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($settings) {
         unset($settings['user_id']);
@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $custom_colors = $result->fetchArray(SQLITE3_ASSOC);
+    $custom_colors = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($custom_colors) {
         unset($custom_colors['user_id']);
         $settings['custom_colors'] = $custom_colors;
@@ -104,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
-    $custom_css = $result->fetchArray(SQLITE3_ASSOC);
+    $custom_css = $result->fetchArray(PDO::FETCH_ASSOC);
     if ($custom_css) {
         unset($custom_css['user_id']);
         $settings['custom_css'] = $custom_css;

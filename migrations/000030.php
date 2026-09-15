@@ -5,8 +5,8 @@
 
 // Add the ignore_ssl column to the webhook_notifications table
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('webhook_notifications') where name='ignore_ssl'");
-$columnRequired = $columnQuery->fetchArray(SQLITE3_ASSOC) === false;
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'ignore_ssl'");
+$columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
     $db->exec('ALTER TABLE webhook_notifications ADD COLUMN ignore_ssl INTEGER DEFAULT 0');
@@ -14,8 +14,8 @@ if ($columnRequired) {
 
 // Add the ignore_ssl column to the ntfy_notifications table
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('ntfy_notifications') where name='ignore_ssl'");
-$columnRequired = $columnQuery->fetchArray(SQLITE3_ASSOC) === false;
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'ignore_ssl'");
+$columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
     $db->exec('ALTER TABLE ntfy_notifications ADD COLUMN ignore_ssl INTEGER DEFAULT 0');
@@ -23,8 +23,8 @@ if ($columnRequired) {
 
 // Add the ignore_ssl column to the gotify_notifications table
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('gotify_notifications') where name='ignore_ssl'");
-$columnRequired = $columnQuery->fetchArray(SQLITE3_ASSOC) === false;
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'ignore_ssl'");
+$columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
     $db->exec('ALTER TABLE gotify_notifications ADD COLUMN ignore_ssl INTEGER DEFAULT 0');

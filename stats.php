@@ -9,9 +9,9 @@ $query = "SELECT c.code
           INNER JOIN user u ON c.id = u.main_currency
           WHERE u.id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 $code = $row['code'];
 
 require_once 'includes/stats_calculations.php';

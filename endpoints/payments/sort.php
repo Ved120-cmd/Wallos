@@ -7,11 +7,11 @@ $paymentMethods = $_POST['paymentMethodIds'];
 $order = 1;
 
 foreach ($paymentMethods as $paymentMethodId) {
-    $sql = "UPDATE payment_methods SET `order` = :order WHERE id = :paymentMethodId and user_id = :userId";
+    $sql = "UPDATE payment_methods SET \"order\" = :order WHERE id = :paymentMethodId and user_id = :userId";
     $stmt = $db->prepare($sql);
-    $stmt->bindParam(':order', $order, SQLITE3_INTEGER);
-    $stmt->bindParam(':paymentMethodId', $paymentMethodId, SQLITE3_INTEGER);
-    $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(':order', $order, PDO::PARAM_INT);
+    $stmt->bindParam(':paymentMethodId', $paymentMethodId, PDO::PARAM_INT);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
     $order++;
 }

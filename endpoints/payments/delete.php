@@ -9,8 +9,8 @@ $data = json_decode($input, true);
 $paymentMethodId = $data["id"];
 
 $checkStmt = $db->prepare('SELECT COUNT(*) as count FROM subscriptions WHERE payment_method_id = :paymentMethodId and user_id = :userId');
-$checkStmt->bindParam(':paymentMethodId', $paymentMethodId, SQLITE3_INTEGER);
-$checkStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$checkStmt->bindParam(':paymentMethodId', $paymentMethodId, PDO::PARAM_INT);
+$checkStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 $checkResult = $checkStmt->execute();
 $row = $checkResult->fetchArray();
 $inUse = $row['count'] > 0;
@@ -24,8 +24,8 @@ if ($inUse) {
 
 $deleteQuery = "DELETE FROM payment_methods WHERE id = :paymentMethodId and user_id = :userId";
 $deleteStmt = $db->prepare($deleteQuery);
-$deleteStmt->bindParam(':paymentMethodId', $paymentMethodId, SQLITE3_INTEGER);
-$deleteStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$deleteStmt->bindParam(':paymentMethodId', $paymentMethodId, PDO::PARAM_INT);
+$deleteStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($deleteStmt->execute()) {
     $success['success'] = true;

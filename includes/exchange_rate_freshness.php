@@ -17,7 +17,7 @@
  * endpoint was written to make, and it needs no object built from a value that
  * might be missing.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @return bool false whenever the answer is not certain, so an uncertain case
  *              refreshes rather than silently skipping
@@ -30,14 +30,14 @@ function wallos_rates_refreshed_today($db, $userId)
         return false;
     }
 
-    $statement->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $statement->execute();
 
     if ($result === false) {
         return false;
     }
 
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
     return $row !== false && !empty($row['date'])
         && $row['date'] >= (new DateTime())->format('Y-m-d');

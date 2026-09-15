@@ -5,10 +5,10 @@ require_once 'includes/header.php';
 $uploadedAvatars = [];
 
 $stmt = $db->prepare("SELECT path FROM uploaded_avatars WHERE user_id = :user_id");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $uploadedAvatars[] = $row['path'];
 }
 ?>
@@ -108,9 +108,9 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                         $currencies = array();
                         $query = "SELECT * FROM currencies WHERE user_id = :userId";
                         $query = $db->prepare($query);
-                        $query->bindValue(':userId', $userId, SQLITE3_INTEGER);
+                        $query->bindValue(':userId', $userId, PDO::PARAM_INT);
                         $result = $query->execute();
-                        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
                             $currencyId = $row['id'];
                             $currencies[$currencyId] = $row;
                         }
@@ -160,7 +160,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
     $sql = "SELECT login_disabled FROM admin";
     $stmt = $db->prepare($sql);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $loginDisabled = $row['login_disabled'];
 
     $showTotpSection = true;

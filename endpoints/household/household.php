@@ -25,8 +25,8 @@ function handleAddMember($db, $userId, $i18n)
     $householdName = "Member";
     $sqlInsert = "INSERT INTO household (name, user_id) VALUES (:name, :userId)";
     $stmtInsert = $db->prepare($sqlInsert);
-    $stmtInsert->bindParam(':name', $householdName, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmtInsert->bindParam(':name', $householdName, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
     $resultInsert = $stmtInsert->execute();
 
     if ($resultInsert) {
@@ -54,10 +54,10 @@ function handleEditMember($db, $userId, $i18n)
         $email = validate($email);
         $sql = "UPDATE household SET name = :name, email = :email WHERE id = :memberId AND user_id = :userId";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmt->bindParam(':email', $email, SQLITE3_TEXT);
-        $stmt->bindParam(':memberId', $memberId, SQLITE3_INTEGER);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->bindParam(':memberId', $memberId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
 
         if ($result) {
@@ -88,8 +88,8 @@ function handleDeleteMember($db, $userId, $i18n)
         $memberId = $_POST['memberId'];
         $checkMember = "SELECT COUNT(*) FROM subscriptions WHERE payer_user_id = :memberId AND user_id = :userId";
         $checkStmt = $db->prepare($checkMember);
-        $checkStmt->bindParam(':memberId', $memberId, SQLITE3_INTEGER);
-        $checkStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindParam(':memberId', $memberId, PDO::PARAM_INT);
+        $checkStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
         $row = $checkResult->fetchArray();
         $count = $row[0];
@@ -103,8 +103,8 @@ function handleDeleteMember($db, $userId, $i18n)
         } else {
             $sql = "DELETE FROM household WHERE id = :memberId and user_id = :userId";
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':memberId', $memberId, SQLITE3_INTEGER);
-            $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+            $stmt->bindParam(':memberId', $memberId, PDO::PARAM_INT);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
             $result = $stmt->execute();
             if ($result) {
                 $response = [

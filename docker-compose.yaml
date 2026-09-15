@@ -1,11 +1,17 @@
 services:
   wallos:
     container_name: wallos
-    image: bellamy/wallos:latest
+    build: .
     ports:
       - "8282:80/tcp"
     environment:
       TZ: 'America/Toronto'
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: wallos
+      DB_USER: wallos
+      DB_PASSWORD: wallos-local-password
+      DB_SSLMODE: disable
       # Optional OIDC environment variables
       # OIDC_ENABLED: "true"
       # OIDC_PROVIDER_NAME: "Authelia"
@@ -25,8 +31,26 @@ services:
       # OIDC_REQUIRE_EMAIL_VERIFIED: "true"
       # Optional SSRF allowlist (overrides the Security Settings allowlist in the Admin UI)
       # SSRF_ALLOWLIST: "auth.example.com,192.168.1.100:8123"
-    # Volumes store your data between container upgrades
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
-      - './db:/var/www/html/db'
       - './logos:/var/www/html/images/uploads/logos'
     restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: wallos
+      POSTGRES_USER: wallos
+      POSTGRES_PASSWORD: wallos-local-password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wallos -d wallos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - wallos-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  wallos-postgres-data:

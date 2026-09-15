@@ -38,13 +38,13 @@ if ($smtpPortInt < 1 || $smtpPortInt > 65535) {
 
 // Save settings
 $stmt = $db->prepare('UPDATE admin SET smtp_address = :smtp_address, smtp_port = :smtp_port, encryption = :encryption, smtp_username = :smtp_username, smtp_password = :smtp_password, from_email = :from_email');
-$stmt->bindValue(':smtp_address', $smtpAddress, SQLITE3_TEXT);
-$stmt->bindValue(':smtp_port', $smtpPort, SQLITE3_TEXT);
+$stmt->bindValue(':smtp_address', $smtpAddress, PDO::PARAM_STR);
+$stmt->bindValue(':smtp_port', $smtpPort, PDO::PARAM_STR);
 $encryption = empty($data['encryption']) ? 'tls' : $data['encryption'];
-$stmt->bindValue(':encryption', $encryption, SQLITE3_TEXT);
-$stmt->bindValue(':smtp_username', $smtpUsername, SQLITE3_TEXT);
-$stmt->bindValue(':smtp_password', $smtpPassword, SQLITE3_TEXT);
-$stmt->bindValue(':from_email', $fromEmail, SQLITE3_TEXT);
+$stmt->bindValue(':encryption', $encryption, PDO::PARAM_STR);
+$stmt->bindValue(':smtp_username', $smtpUsername, PDO::PARAM_STR);
+$stmt->bindValue(':smtp_password', $smtpPassword, PDO::PARAM_STR);
+$stmt->bindValue(':from_email', $fromEmail, PDO::PARAM_STR);
 $result = $stmt->execute();
 
 if ($result) {

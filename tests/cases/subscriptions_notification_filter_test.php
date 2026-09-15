@@ -34,7 +34,7 @@ function notification_filter_condition($type)
  * Runs one notification filter condition for a user and returns the
  * subscription names it matches.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @param string  $type
  * @return array
@@ -43,11 +43,11 @@ function notification_filter_names($db, $userId, $type)
 {
     $condition = notification_filter_condition($type);
     $stmt = $db->prepare("SELECT name FROM subscriptions WHERE user_id = :userId AND ($condition) ORDER BY name ASC");
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
     $names = [];
     $result = $stmt->execute();
-    while ($result && $row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($result && $row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $names[] = $row['name'];
     }
 
@@ -76,12 +76,12 @@ wallos_test('the cancellation filter excludes one-time purchases', function () {
     $stmt = $db->prepare('INSERT INTO subscriptions (user_id, name, price, currency_id, next_payment, cycle, frequency, inactive, notify, cancellation_date)
                           VALUES (1, :name, 9.99, :currencyId, :nextPayment, :cycle, 1, 0, :notify, :cancellationDate)');
     foreach ($rows as [$name, $cycle, $notify, $cancellationDate]) {
-        $stmt->bindValue(':name', $name, SQLITE3_TEXT);
-        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), SQLITE3_INTEGER);
-        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+5 days')), SQLITE3_TEXT);
-        $stmt->bindValue(':cycle', $cycle, SQLITE3_INTEGER);
-        $stmt->bindValue(':notify', $notify, SQLITE3_INTEGER);
-        $stmt->bindValue(':cancellationDate', $cancellationDate, $cancellationDate === null ? SQLITE3_NULL : SQLITE3_TEXT);
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+        $stmt->bindValue(':currencyId', wallos_test_currency_id(1, 0), PDO::PARAM_INT);
+        $stmt->bindValue(':nextPayment', date('Y-m-d', strtotime('+5 days')), PDO::PARAM_STR);
+        $stmt->bindValue(':cycle', $cycle, PDO::PARAM_INT);
+        $stmt->bindValue(':notify', $notify, PDO::PARAM_INT);
+        $stmt->bindValue(':cancellationDate', $cancellationDate, $cancellationDate === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
         $stmt->execute();
     }
 

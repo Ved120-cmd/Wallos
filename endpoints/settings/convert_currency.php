@@ -16,8 +16,8 @@ if (!isset($convert_currency) || !is_bool($convert_currency)) {
 }
 
 $stmt = $db->prepare('UPDATE settings SET convert_currency = :convert_currency WHERE user_id = :userId');
-$stmt->bindParam(':convert_currency', $convert_currency, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':convert_currency', $convert_currency, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

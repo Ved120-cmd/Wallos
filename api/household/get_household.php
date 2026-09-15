@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
      $stmt = $db->prepare($sql);
      $stmt->bindValue(':apiKey', $apiKey);
      $result = $stmt->execute();
-     $user = $result->fetchArray(SQLITE3_ASSOC);
+     $user = $result->fetchArray(PDO::FETCH_ASSOC);
  
      // If the user is not found, return an error
      if (!$user) {
@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $household = [];
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $household[] = $row;
     }
 
@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
         $stmt->bindValue(':userId', $userId);
         $stmt->bindValue(':householdId', $household[$key]['id']);
         $result = $stmt->execute();
-        $subscription = $result->fetchArray(SQLITE3_ASSOC);
+        $subscription = $result->fetchArray(PDO::FETCH_ASSOC);
         if ($subscription) {
             $household[$key]['in_use'] = true;
         } else {

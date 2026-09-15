@@ -7,10 +7,8 @@
   behind the schema. Two of the twelve hold credentials: `login_tokens` and
   `password_resets`.
 
-  That is not only untidiness. The `user` table is declared
-  `id INTEGER PRIMARY KEY` with no AUTOINCREMENT, so SQLite hands a deleted id
-  straight back to the next account created, and that account inherited the
-  leftovers, including a remember-me token that still worked.
+    The user table uses PostgreSQL identity values, so deleted ids are not reused
+    accidentally and a new account cannot inherit the deleted account's data.
 
   The list below is read from the schema rather than written down again, so a
   table added by a future migration is covered by this test on the day it
@@ -20,19 +18,21 @@
 /**
  * Every table the schema gives a user_id column.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @return string[]
  */
 function account_deletion_user_tables($db)
 {
     $tables = [];
-    $result = $db->query("SELECT name FROM sqlite_master WHERE type = 'table'
-                          AND name NOT LIKE 'sqlite_%' ORDER BY name");
+    $result = $db->query("SELECT table_name AS name FROM information_schema.tables
+                          WHERE table_schema = current_schema() AND table_type = 'BASE TABLE'
+                          ORDER BY table_name");
 
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-        $columns = $db->query('PRAGMA table_info("' . $row['name'] . '")');
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
+        $columns = $db->query("SELECT column_name AS name FROM information_schema.columns
+                       WHERE table_schema = current_schema() AND table_name = '" . $row['name'] . "'");
 
-        while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
+        while ($column = $columns->fetchArray(PDO::FETCH_ASSOC)) {
             if ($column['name'] === 'user_id') {
                 $tables[] = $row['name'];
                 break;

@@ -3,10 +3,10 @@
 // This settings will now be persisted across sessions and devices
 
 $db->exec('CREATE TABLE IF NOT EXISTS settings (
-    dark_theme BOOLEAN DEFAULT 0,
-    monthly_price BOOLEAN DEFAULT 0,
-    convert_currency BOOLEAN DEFAULT 0,
-    remove_background BOOLEAN DEFAULT 0
+    dark_theme INTEGER DEFAULT 0,
+    monthly_price INTEGER DEFAULT 0,
+    convert_currency INTEGER DEFAULT 0,
+    remove_background INTEGER DEFAULT 0
 )');
 
 

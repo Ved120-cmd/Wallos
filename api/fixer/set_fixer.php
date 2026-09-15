@@ -46,9 +46,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -77,7 +77,7 @@ $provider = intval($provider);
 if ($fixerApiKey === '') {
     $removeSql = "DELETE FROM fixer WHERE user_id = :userId";
     $removeStmt = $db->prepare($removeSql);
-    $removeStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $removeStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $removeResult = $removeStmt->execute();
 
     if ($removeResult) {
@@ -145,7 +145,7 @@ if (isset($apiData['success']) && $apiData['success'] == true) {
     // fixer table that now holds two keys for one user.
     $removeSql = "DELETE FROM fixer WHERE user_id = :userId";
     $removeStmt = $db->prepare($removeSql);
-    $removeStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $removeStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $removeResult = $removeStmt->execute();
 
     if ($removeResult === false) {
@@ -161,20 +161,20 @@ if (isset($apiData['success']) && $apiData['success'] == true) {
     // Insert new settings
     $insertSql = "INSERT INTO fixer (api_key, provider, user_id) VALUES (:api_key, :provider, :userId)";
     $stmtInsert = $db->prepare($insertSql);
-    $stmtInsert->bindParam(':api_key', $fixerApiKey, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':provider', $provider, SQLITE3_INTEGER);
-    $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmtInsert->bindParam(':api_key', $fixerApiKey, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':provider', $provider, PDO::PARAM_INT);
+    $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
     $resultInsert = $stmtInsert->execute();
 
     if ($resultInsert) {
         // If usage limits are parsed and supported by the db schema
         if ($usageLimit !== null && $usageRemaining !== null
-            && $db->querySingle("SELECT COUNT(*) FROM pragma_table_info('fixer') WHERE name='usage_used'") > 0) {
+            && $db->querySingle("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'fixer' AND column_name = 'usage_used'") > 0) {
             $usageStmt = $db->prepare("UPDATE fixer SET usage_used = :used, usage_limit = :limit, usage_updated_at = :updatedAt WHERE user_id = :userId");
-            $usageStmt->bindValue(':used', $usageLimit - $usageRemaining, SQLITE3_INTEGER);
-            $usageStmt->bindValue(':limit', $usageLimit, SQLITE3_INTEGER);
-            $usageStmt->bindValue(':updatedAt', date('Y-m-d H:i:s'), SQLITE3_TEXT);
-            $usageStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $usageStmt->bindValue(':used', $usageLimit - $usageRemaining, PDO::PARAM_INT);
+            $usageStmt->bindValue(':limit', $usageLimit, PDO::PARAM_INT);
+            $usageStmt->bindValue(':updatedAt', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+            $usageStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
             $usageStmt->execute();
         }
 

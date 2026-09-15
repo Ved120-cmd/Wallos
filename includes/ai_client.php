@@ -7,9 +7,9 @@
 function ai_load_settings($db, $userId)
 {
     $stmt = $db->prepare("SELECT * FROM ai_settings WHERE user_id = ?");
-    $stmt->bindValue(1, $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(1, $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
-    $aiSettings = $result->fetchArray(SQLITE3_ASSOC);
+    $aiSettings = $result->fetchArray(PDO::FETCH_ASSOC);
     $stmt->close();
 
     return $aiSettings ?: null;

@@ -12,10 +12,10 @@
 $result = $db->query("SELECT id, notes FROM subscriptions WHERE notes IS NOT NULL AND notes != ''");
 
 $stmt = $db->prepare('UPDATE subscriptions SET notes = :notes WHERE id = :id');
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $decoded = html_entity_decode($row['notes'], ENT_QUOTES, 'UTF-8');
-    $stmt->bindValue(':notes', $decoded, SQLITE3_TEXT);
-    $stmt->bindValue(':id', $row['id'], SQLITE3_INTEGER);
+    $stmt->bindValue(':notes', $decoded, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $row['id'], PDO::PARAM_INT);
     $stmt->execute();
 }
 

@@ -14,7 +14,7 @@ $customCss = $data['customCss'];
 // handed first, so the page can go on serving the css this request replaced -
 // after telling the user it was saved.
 $stmt = $db->prepare('DELETE FROM custom_css_style WHERE user_id = :userId');
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute() === false) {
     die(json_encode([
@@ -24,8 +24,8 @@ if ($stmt->execute() === false) {
 }
 
 $stmt = $db->prepare('INSERT INTO custom_css_style (css, user_id) VALUES (:customCss, :userId)');
-$stmt->bindParam(':customCss', $customCss, SQLITE3_TEXT);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':customCss', $customCss, PDO::PARAM_STR);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

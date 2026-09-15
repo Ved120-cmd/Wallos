@@ -31,7 +31,7 @@ function normalize_upcoming_payments_limit($limit)
 /**
  * Fetch the upcoming subscriptions shown on the dashboard.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int      $userId
  * @param mixed    $limit
  * @return array
@@ -43,17 +43,17 @@ function get_upcoming_payments($db, $userId, $limit)
     $stmt = $db->prepare("SELECT id, logo, logo_text_color, logo_variant, name, price, currency_id, next_payment, inactive
         FROM subscriptions
         WHERE user_id = :userId
-          AND next_payment >= date('now')
+          AND next_payment >= CURRENT_DATE
           AND inactive = 0
           AND cycle != 5
         ORDER BY next_payment ASC
         LIMIT :limit");
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
-    $stmt->bindValue(':limit', $limit, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $result = $stmt->execute();
 
     $subscriptions = [];
-    while ($result && ($row = $result->fetchArray(SQLITE3_ASSOC))) {
+    while ($result && ($row = $result->fetchArray(PDO::FETCH_ASSOC))) {
         $subscriptions[] = $row;
     }
 

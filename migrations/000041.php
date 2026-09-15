@@ -1,8 +1,8 @@
 <?php
 // This migration adds a mattermost_notifications table to store Mattermost notification settings.
 
-$tableQuery = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='mattermost_notifications'");
-$tableExists = $tableQuery->fetchArray(SQLITE3_ASSOC);
+$tableQuery = $db->query("SELECT table_name AS name FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'mattermost_notifications'");
+$tableExists = $tableQuery->fetchArray(PDO::FETCH_ASSOC);
 if ($tableExists === false) {
     $db->exec("
         CREATE TABLE mattermost_notifications (

@@ -69,9 +69,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     // Authenticate user
     $sql = "SELECT * FROM user WHERE api_key = :apiKey";
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+    $stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if (!$user) {
         echo json_encode([
@@ -88,10 +88,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     // Retrieve subscription and check ownership
     $subSql = "SELECT * FROM subscriptions WHERE id = :subscriptionId AND user_id = :userId";
     $subStmt = $db->prepare($subSql);
-    $subStmt->bindValue(':subscriptionId', $subscriptionId, SQLITE3_INTEGER);
-    $subStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $subStmt->bindValue(':subscriptionId', $subscriptionId, PDO::PARAM_INT);
+    $subStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $subResult = $subStmt->execute();
-    $subscription = $subResult->fetchArray(SQLITE3_ASSOC);
+    $subscription = $subResult->fetchArray(PDO::FETCH_ASSOC);
 
     if (!$subscription) {
         echo json_encode([
@@ -105,37 +105,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     // Resolve Category Name
     $catSql = "SELECT name FROM categories WHERE id = :categoryId AND user_id = :userId";
     $catStmt = $db->prepare($catSql);
-    $catStmt->bindValue(':categoryId', $subscription['category_id'], SQLITE3_INTEGER);
-    $catStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $catStmt->bindValue(':categoryId', $subscription['category_id'], PDO::PARAM_INT);
+    $catStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $catResult = $catStmt->execute();
-    $categoryRow = $catResult->fetchArray(SQLITE3_ASSOC);
+    $categoryRow = $catResult->fetchArray(PDO::FETCH_ASSOC);
     $subscription['category_name'] = $categoryRow ? $categoryRow['name'] : 'No category';
 
     // Resolve Payer Name
     $payerSql = "SELECT name FROM household WHERE id = :payerId AND user_id = :userId";
     $payerStmt = $db->prepare($payerSql);
-    $payerStmt->bindValue(':payerId', $subscription['payer_user_id'], SQLITE3_INTEGER);
-    $payerStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $payerStmt->bindValue(':payerId', $subscription['payer_user_id'], PDO::PARAM_INT);
+    $payerStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $payerResult = $payerStmt->execute();
-    $payerRow = $payerResult->fetchArray(SQLITE3_ASSOC);
+    $payerRow = $payerResult->fetchArray(PDO::FETCH_ASSOC);
     $subscription['payer_user_name'] = $payerRow ? $payerRow['name'] : 'Unknown member';
 
     // Resolve Payment Method Name
     $pmSql = "SELECT name FROM payment_methods WHERE id = :pmId AND (user_id = :userId OR user_id = 0 OR user_id IS NULL)";
     $pmStmt = $db->prepare($pmSql);
-    $pmStmt->bindValue(':pmId', $subscription['payment_method_id'], SQLITE3_INTEGER);
-    $pmStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $pmStmt->bindValue(':pmId', $subscription['payment_method_id'], PDO::PARAM_INT);
+    $pmStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $pmResult = $pmStmt->execute();
-    $pmRow = $pmResult->fetchArray(SQLITE3_ASSOC);
+    $pmRow = $pmResult->fetchArray(PDO::FETCH_ASSOC);
     $subscription['payment_method_name'] = $pmRow ? $pmRow['name'] : 'Unknown payment method';
 
     // Optional Currency Conversion
     if (isset($_REQUEST['convert_currency']) && $_REQUEST['convert_currency'] === 'true' && $subscription['currency_id'] != $userCurrencyId) {
         $updateSql = "SELECT * FROM last_exchange_update WHERE user_id = :userId";
         $updateStmt = $db->prepare($updateSql);
-        $updateStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $updateStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $updateResult = $updateStmt->execute();
-        $lastExchangeUpdate = $updateResult->fetchArray(SQLITE3_ASSOC);
+        $lastExchangeUpdate = $updateResult->fetchArray(PDO::FETCH_ASSOC);
         $canConvertCurrency = !empty($lastExchangeUpdate['date']);
 
         if ($canConvertCurrency) {

@@ -61,9 +61,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -89,7 +89,7 @@ if ($userId !== 1) {
 // Fetch current admin settings
 $adminSql = "SELECT * FROM 'admin' WHERE id = 1";
 $adminResult = $db->query($adminSql);
-$adminSettings = $adminResult->fetchArray(SQLITE3_ASSOC);
+$adminSettings = $adminResult->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$adminSettings) {
     echo json_encode([
@@ -167,21 +167,21 @@ $fields = [];
 $params = [];
 
 $columnsMap = [
-    'registrations_open' => SQLITE3_INTEGER,
-    'max_users' => SQLITE3_INTEGER,
-    'require_email_verification' => SQLITE3_INTEGER,
-    'server_url' => SQLITE3_TEXT,
-    'smtp_address' => SQLITE3_TEXT,
-    'smtp_port' => SQLITE3_INTEGER,
-    'smtp_username' => SQLITE3_TEXT,
-    'smtp_password' => SQLITE3_TEXT,
-    'from_email' => SQLITE3_TEXT,
-    'encryption' => SQLITE3_TEXT,
-    'login_disabled' => SQLITE3_INTEGER,
-    'update_notification' => SQLITE3_INTEGER,
-    'oidc_oauth_enabled' => SQLITE3_INTEGER,
-    'local_webhook_notifications_allowlist' => SQLITE3_TEXT,
-    'allow_standard_users_local_webhooks' => SQLITE3_INTEGER
+    'registrations_open' => PDO::PARAM_INT,
+    'max_users' => PDO::PARAM_INT,
+    'require_email_verification' => PDO::PARAM_INT,
+    'server_url' => PDO::PARAM_STR,
+    'smtp_address' => PDO::PARAM_STR,
+    'smtp_port' => PDO::PARAM_INT,
+    'smtp_username' => PDO::PARAM_STR,
+    'smtp_password' => PDO::PARAM_STR,
+    'from_email' => PDO::PARAM_STR,
+    'encryption' => PDO::PARAM_STR,
+    'login_disabled' => PDO::PARAM_INT,
+    'update_notification' => PDO::PARAM_INT,
+    'oidc_oauth_enabled' => PDO::PARAM_INT,
+    'local_webhook_notifications_allowlist' => PDO::PARAM_STR,
+    'allow_standard_users_local_webhooks' => PDO::PARAM_INT
 ];
 
 if (wallos_get_effective_ssrf_allowlist($db)['is_managed']) {
@@ -195,15 +195,15 @@ if (isset(wallos_get_effective_oidc_configuration($db)['managed_fields']['enable
 foreach ($columnsMap as $postKey => $dataType) {
     if (isset($_POST[$postKey])) {
         $fields[] = "$postKey = :$postKey";
-        if ($dataType === SQLITE3_INTEGER) {
+        if ($dataType === PDO::PARAM_INT) {
             $params[$postKey] = [
                 'val' => intval($_POST[$postKey]),
-                'type' => SQLITE3_INTEGER
+                'type' => PDO::PARAM_INT
             ];
         } else {
             $params[$postKey] = [
                 'val' => $_POST[$postKey],
-                'type' => SQLITE3_TEXT
+                'type' => PDO::PARAM_STR
             ];
         }
     }

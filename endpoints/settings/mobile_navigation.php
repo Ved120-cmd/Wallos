@@ -17,8 +17,8 @@ if (!isset($mobile_nav) || !is_bool($mobile_nav)) {
 }
 
 $stmt = $db->prepare('UPDATE settings SET mobile_nav = :mobile_nav WHERE user_id = :userId');
-$stmt->bindParam(':mobile_nav', $mobile_nav, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':mobile_nav', $mobile_nav, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

@@ -16,8 +16,8 @@ if (!isset($show_subscription_progress) || !is_bool($show_subscription_progress)
 }
 
 $stmt = $db->prepare('UPDATE settings SET show_subscription_progress = :show_subscription_progress WHERE user_id = :userId');
-$stmt->bindParam(':show_subscription_progress', $show_subscription_progress, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':show_subscription_progress', $show_subscription_progress, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 
 if ($stmt->execute()) {
     die(json_encode([

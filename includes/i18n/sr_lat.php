@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Token za podešavanje",
     "restore_database_info" => "Za vraćanje rezervne kopije potreban je token za podešavanje. Preuzmite ga pomoću jedne od metoda ispod:",
     "setup_token_docker" => "Docker: pokrenite docker logs &lt;container-name&gt; i potražite \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: pročitajte datoteku db/setup_token.db na serveru",
+    "setup_token_file" => "Bare metal: pročitajte datoteku the WALLOS_SETUP_TOKEN environment variable na serveru",
     "select_backup_file" => "Izaberite datoteku rezervne kopije",
     // Stranica za prijavu
     "please_login" => "Molimo vas da se prijavite",

@@ -15,6 +15,9 @@ usermod -o -u "$PUID" www-data
 chown -R www-data:www-data /var/www/html
 chown -R www-data:www-data /tmp
 chmod -R 770 /tmp
+mkdir -p /tmp/wallos-sessions
+chown -R www-data:www-data /tmp/wallos-sessions
+chmod 770 /tmp/wallos-sessions
 
 # PIDs we’ll track
 PHP_FPM_PID=
@@ -60,15 +63,11 @@ touch ~/startup.txt
 # Wait one second before running scripts
 sleep 1
 
-# Create database if it does not exist
+# Initialize the external PostgreSQL schema if needed
 /usr/local/bin/php /var/www/html/endpoints/cronjobs/createdatabase.php
 
 # Perform any database migrations
 /usr/local/bin/php /var/www/html/endpoints/db/migrate.php
-
-# Change permissions on the database directory
-chmod -R 755 /var/www/html/db/
-chown -R www-data:www-data /var/www/html/db/
 
 mkdir -p /var/www/html/images/uploads/logos/avatars
 

@@ -1,6 +1,6 @@
 <?php
 $query = "SELECT COUNT(*) as count FROM user";
 $result = $db->query($query);
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 $userCount = $row['count'];
 ?>

@@ -92,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
 
     // If the user is not found, return an error
     if (!$user) {
@@ -111,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $payment_methods = [];
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $payment_methods[] = $row;
     }
 
@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
         $stmt->bindValue(':userId', $userId);
         $stmt->bindValue(':paymentMethodId', $payment_methods[$key]['id']);
         $result = $stmt->execute();
-        $subscription = $result->fetchArray(SQLITE3_ASSOC);
+        $subscription = $result->fetchArray(PDO::FETCH_ASSOC);
         if ($subscription) {
             $payment_methods[$key]['in_use'] = true;
         } else {

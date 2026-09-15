@@ -55,9 +55,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -317,7 +317,7 @@ switch ($action) {
         // Get the maximum existing ID
         $stmtMax = $db->prepare("SELECT MAX(id) as maxID FROM payment_methods");
         $resultMax = $stmtMax->execute();
-        $rowMax = $resultMax->fetchArray(SQLITE3_ASSOC);
+        $rowMax = $resultMax->fetchArray(PDO::FETCH_ASSOC);
         $maxID = $rowMax['maxID'] ?? 0;
 
         // Ensure custom ID is >= 32
@@ -326,11 +326,11 @@ switch ($action) {
         // Insert
         $sqlInsert = "INSERT INTO payment_methods (id, name, icon, enabled, user_id) VALUES (:id, :name, :icon, :enabled, :userId)";
         $stmtInsert = $db->prepare($sqlInsert);
-        $stmtInsert->bindParam(':id', $newID, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':icon', $icon, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':enabled', $enabled, SQLITE3_INTEGER);
-        $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtInsert->bindParam(':id', $newID, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':icon', $icon, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':enabled', $enabled, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmtInsert->execute()) {
             echo json_encode([
@@ -363,10 +363,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM payment_methods WHERE id = :paymentId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':paymentId', $paymentId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':paymentId', $paymentId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $paymentMethod = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $paymentMethod = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$paymentMethod) {
             echo json_encode([
@@ -389,8 +389,8 @@ switch ($action) {
         if ($enabled == 0 && $paymentMethod['enabled'] == 1) {
             $checkUseSql = "SELECT COUNT(*) FROM subscriptions WHERE payment_method_id = :paymentId AND user_id = :userId";
             $checkUseStmt = $db->prepare($checkUseSql);
-            $checkUseStmt->bindParam(':paymentId', $paymentId, SQLITE3_INTEGER);
-            $checkUseStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+            $checkUseStmt->bindParam(':paymentId', $paymentId, PDO::PARAM_INT);
+            $checkUseStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
             $checkUseResult = $checkUseStmt->execute();
             $row = $checkUseResult->fetchArray();
             $count = $row[0] ?? 0;
@@ -440,11 +440,11 @@ switch ($action) {
         // Update
         $sqlUpdate = "UPDATE payment_methods SET name = :name, icon = :icon, enabled = :enabled WHERE id = :paymentId AND user_id = :userId";
         $stmtUpdate = $db->prepare($sqlUpdate);
-        $stmtUpdate->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':icon', $icon, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':enabled', $enabled, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':paymentId', $paymentId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtUpdate->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':icon', $icon, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':enabled', $enabled, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':paymentId', $paymentId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmtUpdate->execute()) {
             echo json_encode([
@@ -476,10 +476,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM payment_methods WHERE id = :paymentId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':paymentId', $paymentId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':paymentId', $paymentId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $paymentMethod = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $paymentMethod = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$paymentMethod) {
             echo json_encode([
@@ -493,8 +493,8 @@ switch ($action) {
         // Check if in use in subscriptions
         $checkUseSql = "SELECT COUNT(*) FROM subscriptions WHERE payment_method_id = :paymentId AND user_id = :userId";
         $checkUseStmt = $db->prepare($checkUseSql);
-        $checkUseStmt->bindParam(':paymentId', $paymentId, SQLITE3_INTEGER);
-        $checkUseStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkUseStmt->bindParam(':paymentId', $paymentId, PDO::PARAM_INT);
+        $checkUseStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkUseResult = $checkUseStmt->execute();
         $row = $checkUseResult->fetchArray();
         $count = $row[0] ?? 0;
@@ -511,8 +511,8 @@ switch ($action) {
         // Delete
         $sqlDelete = "DELETE FROM payment_methods WHERE id = :paymentId AND user_id = :userId";
         $stmtDelete = $db->prepare($sqlDelete);
-        $stmtDelete->bindParam(':paymentId', $paymentId, SQLITE3_INTEGER);
-        $stmtDelete->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtDelete->bindParam(':paymentId', $paymentId, PDO::PARAM_INT);
+        $stmtDelete->bindParam(':userId', $userId, PDO::PARAM_INT);
 
         if ($stmtDelete->execute()) {
             echo json_encode([

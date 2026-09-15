@@ -26,9 +26,9 @@ switch ($action) {
 function handleAddCategory($db, $userId, $i18n)
 {
     $stmt = $db->prepare('SELECT MAX("order") as maxOrder FROM categories WHERE user_id = :userId');
-    $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
     $maxOrder = $row['maxOrder'];
 
     if ($maxOrder === NULL) {
@@ -40,9 +40,9 @@ function handleAddCategory($db, $userId, $i18n)
     $categoryName = "Category";
     $sqlInsert = 'INSERT INTO categories ("name", "order", "user_id") VALUES (:name, :order, :userId)';
     $stmtInsert = $db->prepare($sqlInsert);
-    $stmtInsert->bindParam(':name', $categoryName, SQLITE3_TEXT);
-    $stmtInsert->bindParam(':order', $order, SQLITE3_INTEGER);
-    $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+    $stmtInsert->bindParam(':name', $categoryName, PDO::PARAM_STR);
+    $stmtInsert->bindParam(':order', $order, PDO::PARAM_INT);
+    $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
     $resultInsert = $stmtInsert->execute();
 
     if ($resultInsert) {
@@ -68,9 +68,9 @@ function handleEditCategory($db, $userId, $i18n)
         $name = validate($_POST['name']);
         $sql = "UPDATE categories SET name = :name WHERE id = :categoryId AND user_id = :userId";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmt->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
 
         if ($result) {
@@ -101,8 +101,8 @@ function handleDeleteCategory($db, $userId, $i18n)
         $categoryId = $_POST['categoryId'];
         $checkCategory = "SELECT COUNT(*) FROM subscriptions WHERE category_id = :categoryId AND user_id = :userId";
         $checkStmt = $db->prepare($checkCategory);
-        $checkStmt->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $checkStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $checkStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
         $row = $checkResult->fetchArray();
         $count = $row[0];
@@ -116,8 +116,8 @@ function handleDeleteCategory($db, $userId, $i18n)
         } else {
             $sql = "DELETE FROM categories WHERE id = :categoryId AND user_id = :userId";
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-            $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+            $stmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
             $result = $stmt->execute();
             if ($result) {
                 $response = [
@@ -148,11 +148,11 @@ function handleSortCategories($db, $userId, $i18n)
     $order = 2;
 
     foreach ($categories as $categoryId) {
-        $sql = "UPDATE categories SET `order` = :order WHERE id = :categoryId AND user_id = :userId";
+        $sql = "UPDATE categories SET \"order\" = :order WHERE id = :categoryId AND user_id = :userId";
         $stmt = $db->prepare($sql);
-        $stmt->bindParam(':order', $order, SQLITE3_INTEGER);
-        $stmt->bindParam(':categoryId', $categoryId, SQLITE3_INTEGER);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':order', $order, PDO::PARAM_INT);
+        $stmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
         $order++;
     }

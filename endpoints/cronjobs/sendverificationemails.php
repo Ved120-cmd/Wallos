@@ -11,7 +11,7 @@ require 'settimezone.php';
 $query = "SELECT * FROM admin";
 $stmt = $db->prepare($query);
 $result = $stmt->execute();
-$admin = $result->fetchArray(SQLITE3_ASSOC);
+$admin = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($admin['require_email_verification'] == 0) {
     if (php_sapi_name() !== 'cli') {
@@ -25,7 +25,7 @@ $stmt = $db->prepare($query);
 $result = $stmt->execute();
 
 $rows = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $rows[] = $row;
 }
 
@@ -75,7 +75,7 @@ if ($rows) {
 
                 $query = "UPDATE email_verification SET email_sent = 1 WHERE id = :id";
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(':id', $user['id'], SQLITE3_INTEGER);
+                $stmt->bindParam(':id', $user['id'], PDO::PARAM_INT);
                 $stmt->execute();
 
                 $mail->clearAddresses();

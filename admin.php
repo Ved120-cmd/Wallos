@@ -11,7 +11,7 @@ if ($isAdmin != 1) {
 // get admin settings from admin table
 $stmt = $db->prepare('SELECT * FROM admin');
 $result = $stmt->execute();
-$settings = $result->fetchArray(SQLITE3_ASSOC);
+$settings = $result->fetchArray(PDO::FETCH_ASSOC);
 
 $oidcConfiguration = wallos_get_effective_oidc_configuration($db);
 $oidcSettings = $oidcConfiguration['settings'];
@@ -31,7 +31,7 @@ $stmt = $db->prepare('SELECT id, username, email FROM user ORDER BY id ASC');
 $result = $stmt->execute();
 
 $users = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $users[] = $row;
 }
 $userCount = is_array($users) ? count($users) : 0;
@@ -417,7 +417,7 @@ $loginDisabledAllowed = $userCount == 1 && $settings['registrations_open'] == 0;
 
     $logosOnDisk = [];
     $logosOnDB = [];
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $logosOnDB[] = $row['logo'];
         $logosOnDB[] = $row['logo_variant'];
     }
@@ -427,7 +427,7 @@ $loginDisabledAllowed = $userCount == 1 && $settings['registrations_open'] == 0;
     $stmt = $db->prepare($query);
     $result = $stmt->execute();
 
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         if (!strstr($row['icon'], "images/uploads/icons/")) {
             $logosOnDB[] = $row['icon'];
         }

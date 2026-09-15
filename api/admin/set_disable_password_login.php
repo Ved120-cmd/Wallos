@@ -48,7 +48,7 @@ $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
 $stmt->bindValue(':apiKey', $apiKey);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user || $user['id'] !== 1) {
     echo json_encode([
@@ -91,7 +91,7 @@ if (wallos_has_oidc_env_value('OIDC_DISABLE_PASSWORD_LOGIN')) {
 // Update the password_login_disabled setting
 $updateSql = "UPDATE oauth_settings SET password_login_disabled = :disable WHERE id = 1";
 $updateStmt = $db->prepare($updateSql);
-$updateStmt->bindValue(':disable', intval($disable), SQLITE3_INTEGER);
+$updateStmt->bindValue(':disable', intval($disable), PDO::PARAM_INT);
 $updateResult = $updateStmt->execute();
 
 if ($updateResult) {

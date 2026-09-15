@@ -22,7 +22,7 @@ $i18n = [
     "setup_token" => "Setup Token",
     "restore_database_info" => "A setup token is required to restore a backup. Retrieve it using one of the methods below:",
     "setup_token_docker" => "Docker: run docker logs &lt;container-name&gt; and look for \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: read the file db/setup_token.db on your server",
+    "setup_token_file" => "Bare metal: read the file the WALLOS_SETUP_TOKEN environment variable on your server",
     "select_backup_file" => "Select Backup File",
     // Login Page
     "please_login" => "Please login",

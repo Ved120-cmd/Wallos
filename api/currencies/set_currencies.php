@@ -53,9 +53,9 @@ if (!$apiKey) {
 
 $sql = "SELECT * FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo json_encode([
@@ -102,11 +102,11 @@ switch ($action) {
         // Insert
         $sqlInsert = "INSERT INTO currencies (name, symbol, code, rate, user_id) VALUES (:name, :symbol, :code, :rate, :userId)";
         $stmtInsert = $db->prepare($sqlInsert);
-        $stmtInsert->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':symbol', $symbol, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':code', $code, SQLITE3_TEXT);
-        $stmtInsert->bindParam(':rate', $rate, SQLITE3_FLOAT);
-        $stmtInsert->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtInsert->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':symbol', $symbol, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':code', $code, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':rate', $rate, PDO::PARAM_STR);
+        $stmtInsert->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultInsert = $stmtInsert->execute();
 
         if ($resultInsert) {
@@ -148,10 +148,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM currencies WHERE id = :currencyId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':currencyId', $currencyId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $currency = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $currency = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$currency) {
             echo json_encode([
@@ -171,14 +171,14 @@ switch ($action) {
         }
 
         $stmtUpdate = $db->prepare($sqlUpdate);
-        $stmtUpdate->bindParam(':name', $name, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':symbol', $symbol, SQLITE3_TEXT);
-        $stmtUpdate->bindParam(':code', $code, SQLITE3_TEXT);
+        $stmtUpdate->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':symbol', $symbol, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(':code', $code, PDO::PARAM_STR);
         if (isset($_POST['rate'])) {
-            $stmtUpdate->bindParam(':rate', $rate, SQLITE3_FLOAT);
+            $stmtUpdate->bindParam(':rate', $rate, PDO::PARAM_STR);
         }
-        $stmtUpdate->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $stmtUpdate->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtUpdate->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultUpdate = $stmtUpdate->execute();
 
         if ($resultUpdate) {
@@ -212,10 +212,10 @@ switch ($action) {
         // Check ownership
         $checkSql = "SELECT * FROM currencies WHERE id = :currencyId AND user_id = :userId";
         $checkStmt = $db->prepare($checkSql);
-        $checkStmt->bindValue(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $checkStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+        $checkStmt->bindValue(':currencyId', $currencyId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
         $checkResult = $checkStmt->execute();
-        $currency = $checkResult->fetchArray(SQLITE3_ASSOC);
+        $currency = $checkResult->fetchArray(PDO::FETCH_ASSOC);
 
         if (!$currency) {
             echo json_encode([
@@ -240,8 +240,8 @@ switch ($action) {
         // Check if in use
         $checkUseSql = "SELECT COUNT(*) FROM subscriptions WHERE currency_id = :currencyId AND user_id = :userId";
         $checkUseStmt = $db->prepare($checkUseSql);
-        $checkUseStmt->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $checkUseStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $checkUseStmt->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $checkUseStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $checkUseResult = $checkUseStmt->execute();
         $row = $checkUseResult->fetchArray();
         $count = $row[0] ?? 0;
@@ -258,8 +258,8 @@ switch ($action) {
         // Delete
         $sqlDelete = "DELETE FROM currencies WHERE id = :currencyId AND user_id = :userId";
         $stmtDelete = $db->prepare($sqlDelete);
-        $stmtDelete->bindParam(':currencyId', $currencyId, SQLITE3_INTEGER);
-        $stmtDelete->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmtDelete->bindParam(':currencyId', $currencyId, PDO::PARAM_INT);
+        $stmtDelete->bindParam(':userId', $userId, PDO::PARAM_INT);
         $resultDelete = $stmtDelete->execute();
 
         if ($resultDelete) {

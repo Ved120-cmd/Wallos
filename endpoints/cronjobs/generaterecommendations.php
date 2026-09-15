@@ -23,12 +23,12 @@ $stmt = $db->prepare("
     AND model != ''
     AND run_schedule = ?
 ");
-$stmt->bindValue(1, $runType, SQLITE3_TEXT);
+$stmt->bindValue(1, $runType, PDO::PARAM_STR);
 $queryResult = $stmt->execute();
 
 // Fetch all into array first so the connection is free for inner queries
 $allAiSettings = [];
-while ($row = $queryResult->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $queryResult->fetchArray(PDO::FETCH_ASSOC)) {
     $allAiSettings[] = $row;
 }
 $stmt->close();
@@ -110,44 +110,44 @@ foreach ($allAiSettings as $aiSettings) {
 
     // Categories
     $catStmt = $db->prepare("SELECT * FROM categories WHERE user_id = :user_id");
-    $catStmt->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
+    $catStmt->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
     $catResult = $catStmt->execute();
     $categories = [];
-    while ($row = $catResult->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $catResult->fetchArray(PDO::FETCH_ASSOC)) {
         $categories[$row['id']] = $row;
     }
 
     // Currencies
     $curStmt = $db->prepare("SELECT * FROM currencies WHERE user_id = :user_id");
-    $curStmt->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
+    $curStmt->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
     $curResult = $curStmt->execute();
     $currencies = [];
-    while ($row = $curResult->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $curResult->fetchArray(PDO::FETCH_ASSOC)) {
         $currencies[$row['id']] = $row;
     }
 
     // Household members
     $memStmt = $db->prepare("SELECT * FROM household WHERE user_id = :user_id");
-    $memStmt->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
+    $memStmt->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
     $memResult = $memStmt->execute();
     $members = [];
-    while ($row = $memResult->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $memResult->fetchArray(PDO::FETCH_ASSOC)) {
         $members[$row['id']] = $row;
     }
 
     // User language
     $langStmt = $db->prepare("SELECT language FROM user WHERE id = :user_id");
-    $langStmt->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
+    $langStmt->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
     $langResult = $langStmt->execute();
-    $userLanguage = $langResult->fetchArray(SQLITE3_ASSOC)['language'] ?? 'en';
+    $userLanguage = $langResult->fetchArray(PDO::FETCH_ASSOC)['language'] ?? 'en';
     $userLanguageName = $languages[$userLanguage]['name'] ?? 'English';
 
     // Subscriptions
     $subStmt = $db->prepare("SELECT * FROM subscriptions WHERE user_id = :user_id AND inactive = 0");
-    $subStmt->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
+    $subStmt->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
     $subResult = $subStmt->execute();
     $subscriptions = [];
-    while ($row = $subResult->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $subResult->fetchArray(PDO::FETCH_ASSOC)) {
         $subscriptions[] = $row;
     }
 
@@ -305,7 +305,7 @@ PROMPT;
 
     // Save recommendations
     $delStmt = $db->prepare("DELETE FROM ai_recommendations WHERE user_id = :user_id");
-    $delStmt->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
+    $delStmt->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
     $delStmt->execute();
 
     $insert = $db->prepare("
@@ -313,17 +313,17 @@ PROMPT;
         VALUES (:user_id, :type, :title, :description, :savings)
     ");
     foreach ($recommendations as $rec) {
-        $insert->bindValue(':user_id', $tempUserId, SQLITE3_INTEGER);
-        $insert->bindValue(':type', 'subscription', SQLITE3_TEXT);
-        $insert->bindValue(':title', $rec['title'] ?? '', SQLITE3_TEXT);
-        $insert->bindValue(':description', $rec['description'] ?? '', SQLITE3_TEXT);
-        $insert->bindValue(':savings', $rec['savings'] ?? '', SQLITE3_TEXT);
+        $insert->bindValue(':user_id', $tempUserId, PDO::PARAM_INT);
+        $insert->bindValue(':type', 'subscription', PDO::PARAM_STR);
+        $insert->bindValue(':title', $rec['title'] ?? '', PDO::PARAM_STR);
+        $insert->bindValue(':description', $rec['description'] ?? '', PDO::PARAM_STR);
+        $insert->bindValue(':savings', $rec['savings'] ?? '', PDO::PARAM_STR);
         $insert->execute();
     }
 
     // Update last_successful_run
     $updateStmt = $db->prepare("UPDATE ai_settings SET last_successful_run = CURRENT_TIMESTAMP WHERE user_id = ?");
-    $updateStmt->bindValue(1, $tempUserId, SQLITE3_INTEGER);
+    $updateStmt->bindValue(1, $tempUserId, PDO::PARAM_INT);
     $updateStmt->execute();
 
     $successes++;

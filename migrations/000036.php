@@ -4,15 +4,15 @@
 // Also removes the iterator column as it is not used anymore.
 // The cancelation payload will be used to send cancelation notifications to the webhook
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('webhook_notifications') where name='cancelation_payload'");
-$columnRequired = $columnQuery->fetchArray(SQLITE3_ASSOC) === false;
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'cancelation_payload'");
+$columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
     $db->exec("ALTER TABLE webhook_notifications ADD COLUMN cancelation_payload TEXT DEFAULT ''");
 }
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('webhook_notifications') where name='iterator'");
-$columnRequired = $columnQuery->fetchArray(SQLITE3_ASSOC) !== false;
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'cancelation_payload'");
+$columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) !== false;
 if ($columnRequired) {
     $db->exec("ALTER TABLE webhook_notifications DROP COLUMN iterator");
 }

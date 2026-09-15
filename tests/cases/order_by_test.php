@@ -3,7 +3,7 @@
   ORDER BY names a column, not a string.
 
   `ORDER BY 'order'` sorts by a constant. Every row gets the same sort key, so
-  SQLite returns them in whatever order it happens to have them and the list
+  PostgreSQL does not guarantee row order without an explicit ordering clause and the list
   looks unsorted for no visible reason: the statement is valid, nothing warns,
   and the column the user drags into place is never consulted.
 

@@ -8,7 +8,7 @@ $shouldUpdate = true;
 if (isset($_POST['force']) && $_POST['force'] === "true") {
     $shouldUpdate = true;
 } else {
-    // This branch could not run. It built a DateTime out of the SQLite3Result
+    // This branch could not run. It built a DateTime out of the PDOStatement
     // rather than out of a value fetched from it, which on PHP 8 is a
     // TypeError and a fatal, and it went unnoticed because the interface only
     // ever posts force=true, so nothing has reached it.
@@ -22,11 +22,11 @@ if (isset($_POST['force']) && $_POST['force'] === "true") {
 
 $query = "SELECT api_key, provider FROM fixer WHERE user_id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result) {
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($row) {
         $apiKey = $row['api_key'];
@@ -35,17 +35,17 @@ if ($result) {
         $codes = "";
         $query = "SELECT id, name, symbol, code FROM currencies WHERE user_id = :userId";
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
             $codes .= $row['code'] . ",";
         }
         $codes = rtrim($codes, ',');
         $query = "SELECT u.main_currency, c.code FROM user u LEFT JOIN currencies c ON u.main_currency = c.id WHERE u.id = :userId";
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $row = $result->fetchArray(PDO::FETCH_ASSOC);
         $mainCurrencyCode = $row['code'];
         $mainCurrencyId = $row['main_currency'];
 
@@ -72,12 +72,12 @@ if ($result) {
                     }
                 }
                 if ($usageLimit !== null && $usageRemaining !== null
-                    && $db->querySingle("SELECT COUNT(*) FROM pragma_table_info('fixer') WHERE name='usage_used'") > 0) {
+                    && $db->querySingle("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'fixer' AND column_name = 'usage_used'") > 0) {
                     $usageStmt = $db->prepare("UPDATE fixer SET usage_used = :used, usage_limit = :limit, usage_updated_at = :updatedAt WHERE user_id = :userId");
-                    $usageStmt->bindValue(':used', $usageLimit - $usageRemaining, SQLITE3_INTEGER);
-                    $usageStmt->bindValue(':limit', $usageLimit, SQLITE3_INTEGER);
-                    $usageStmt->bindValue(':updatedAt', date('Y-m-d H:i:s'), SQLITE3_TEXT);
-                    $usageStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+                    $usageStmt->bindValue(':used', $usageLimit - $usageRemaining, PDO::PARAM_INT);
+                    $usageStmt->bindValue(':limit', $usageLimit, PDO::PARAM_INT);
+                    $usageStmt->bindValue(':updatedAt', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+                    $usageStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
                     $usageStmt->execute();
                 }
             }
@@ -94,7 +94,7 @@ if ($result) {
             // The rates and the refresh date are one unit of work: a failure
             // halfway through would otherwise leave some rows converted against
             // the new base and some against the old one.
-            $db->exec('BEGIN');
+            $db->beginTransaction();
 
             $updateQuery = "UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId";
             $updateStmt = $db->prepare($updateQuery);
@@ -107,9 +107,9 @@ if ($result) {
                     $exchangeRate = $rate / $mainCurrencyToEUR;
                 }
 
-                $updateStmt->bindValue(':rate', $exchangeRate, SQLITE3_TEXT);
-                $updateStmt->bindValue(':code', $currencyCode, SQLITE3_TEXT);
-                $updateStmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+                $updateStmt->bindValue(':rate', $exchangeRate, PDO::PARAM_STR);
+                $updateStmt->bindValue(':code', $currencyCode, PDO::PARAM_STR);
+                $updateStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
                 $updateResult = $updateStmt->execute();
                 $updateStmt->reset();
 
@@ -121,7 +121,7 @@ if ($result) {
             }
 
             if ($updateFailed) {
-                $db->exec('ROLLBACK');
+                $db->rollBack();
                 $db->close();
                 echo "Exchange rates update rolled back.";
             } else {
@@ -130,11 +130,11 @@ if ($result) {
 
                 $updateQuery = "UPDATE last_exchange_update SET date = :formattedDate WHERE user_id = :userId";
                 $updateStmt = $db->prepare($updateQuery);
-                $updateStmt->bindParam(':formattedDate', $formattedDate, SQLITE3_TEXT);
-                $updateStmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+                $updateStmt->bindParam(':formattedDate', $formattedDate, PDO::PARAM_STR);
+                $updateStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
                 $updateResult = $updateStmt->execute();
 
-                $db->exec('COMMIT');
+                $db->commit();
 
                 $db->close();
                 echo "Rates updated successfully!";

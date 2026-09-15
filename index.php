@@ -69,9 +69,9 @@ function formatDate($date, $lang = 'en')
 
 // Get the first name of the user
 $stmt = $db->prepare("SELECT username, firstname FROM user WHERE id = :userId");
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$user = $result->fetchArray(SQLITE3_ASSOC);
+$user = $result->fetchArray(PDO::FETCH_ASSOC);
 $first_name = $user['firstname'] ?? $user['username'] ?? '';
 
 // Fetch the enabled subscriptions up for payment using the user's dashboard setting.
@@ -83,10 +83,10 @@ $upcomingSubscriptions = get_upcoming_payments(
 
 // Fetch enabled subscriptions with manual renewal that are overdue
 $stmt = $db->prepare("SELECT id, logo, logo_text_color, logo_variant, name, price, currency_id, next_payment, inactive, auto_renew FROM subscriptions WHERE user_id = :userId AND next_payment < date('now') AND auto_renew = 0 AND inactive = 0 AND cycle != 5 ORDER BY next_payment ASC");
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $overdueSubscriptions = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $overdueSubscriptions[] = $row;
 }
 $hasOverdueSubscriptions = !empty($overdueSubscriptions);
@@ -100,10 +100,10 @@ require_once 'includes/stats_calculations.php';
 
 // Get AI Recommendations for user
 $stmt = $db->prepare("SELECT * FROM ai_recommendations WHERE user_id = :userId");
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $aiRecommendations = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $aiRecommendations[] = $row;
 }
 
@@ -494,10 +494,10 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 // Get all subscriptions for user details lookup
 $query = 'SELECT * FROM subscriptions WHERE user_id = :userId';
 $stmt = $db->prepare($query);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $subscriptions = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $subscriptions[] = $row;
 }
 require_once 'includes/subscription_details_popup.php';

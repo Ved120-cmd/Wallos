@@ -4,8 +4,8 @@
 // It adds a "period_summary_at_period_start" column to the "notification_settings" table.
 // It also adds "budget_period_type", "budget_period_anchor_date" and "period_budget" columns to the "user" table.
 
-$columnQuery = $db->query("SELECT * FROM pragma_table_info('notification_settings') WHERE name='period_summary_at_period_start'");
-if ($columnQuery->fetchArray(SQLITE3_ASSOC) === false) {
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+if ($columnQuery->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE notification_settings ADD COLUMN period_summary_at_period_start INTEGER DEFAULT 0');
 }
 
@@ -15,18 +15,18 @@ $db->exec('UPDATE notification_settings
 
 $defaultAnchorDate = (new DateTime('now'))->format('Y-m-d');
 
-$periodTypeColumn = $db->query("SELECT * FROM pragma_table_info('user') WHERE name='budget_period_type'");
-if ($periodTypeColumn->fetchArray(SQLITE3_ASSOC) === false) {
+$periodTypeColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+if ($periodTypeColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE user ADD COLUMN budget_period_type TEXT DEFAULT "monthly"');
 }
 
-$anchorDateColumn = $db->query("SELECT * FROM pragma_table_info('user') WHERE name='budget_period_anchor_date'");
-if ($anchorDateColumn->fetchArray(SQLITE3_ASSOC) === false) {
+$anchorDateColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+if ($anchorDateColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE user ADD COLUMN budget_period_anchor_date TEXT DEFAULT "' . $defaultAnchorDate . '"');
 }
 
-$periodBudgetColumn = $db->query("SELECT * FROM pragma_table_info('user') WHERE name='period_budget'");
-if ($periodBudgetColumn->fetchArray(SQLITE3_ASSOC) === false) {
+$periodBudgetColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+if ($periodBudgetColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE user ADD COLUMN period_budget REAL DEFAULT 0');
 }
 

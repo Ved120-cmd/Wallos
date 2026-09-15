@@ -56,8 +56,8 @@ if (isset($_POST['email']) && $_POST['email'] != "" && isset($_GET['submit']) &&
     $email = $_POST['email'];
 
     $stmt = $db->prepare("SELECT * FROM user WHERE email = :email");
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $user = $stmt->execute()->fetchArray(PDO::FETCH_ASSOC);
 
     $issueFailed = false;
 
@@ -67,13 +67,13 @@ if (isset($_POST['email']) && $_POST['email'] != "" && isset($_GET['submit']) &&
         // all: the old one is gone, the new one never arrived, and the person
         // has just been told the mail is on its way. That account cannot be
         // recovered until someone notices.
-        $db->exec('BEGIN');
+        $db->beginTransaction();
 
         $issued = false;
         $stmt = $db->prepare("DELETE FROM password_resets WHERE email = :email");
 
         if ($stmt !== false) {
-            $stmt->bindValue(':email', $email, SQLITE3_TEXT);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
 
             if ($stmt->execute() !== false) {
                 $token = bin2hex(random_bytes(32));
@@ -81,18 +81,18 @@ if (isset($_POST['email']) && $_POST['email'] != "" && isset($_GET['submit']) &&
                 $stmt = $db->prepare("INSERT INTO password_resets (user_id, email, token) VALUES (:user_id, :email, :token)");
 
                 if ($stmt !== false) {
-                    $stmt->bindValue(':user_id', $user['id'], SQLITE3_INTEGER);
-                    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-                    $stmt->bindValue(':token', $token, SQLITE3_TEXT);
+                    $stmt->bindValue(':user_id', $user['id'], PDO::PARAM_INT);
+                    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+                    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
                     $issued = $stmt->execute() !== false;
                 }
             }
         }
 
         if ($issued) {
-            $issued = $db->exec('COMMIT') !== false;
+            $issued = $db->commit() !== false;
         } else {
-            $db->exec('ROLLBACK');
+            $db->rollBack();
         }
 
         if (!$issued) {
@@ -121,9 +121,9 @@ if (isset($_GET['token']) && $_GET['token'] != "" && isset($_GET['email']) && $_
     $email = $_GET['email'];
     $matchCount = "SELECT COUNT(*) FROM password_resets WHERE token = :token AND email = :email AND created_at > datetime('now', '-1 hour')";
     $stmt = $db->prepare($matchCount);
-    $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-    $count = $stmt->execute()->fetchArray(SQLITE3_NUM);
+    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $count = $stmt->execute()->fetchArray(PDO::FETCH_NUM);
     if ($count[0] == 0) {
         $hasErrorMessage = true;
         $hideForm = true;
@@ -139,15 +139,15 @@ if (isset($_POST['password']) && $_POST['password'] != "" && isset($_POST['confi
     $email = $_POST['email'];
     $resetQuery = "SELECT * FROM password_resets WHERE token = :token AND email = :email AND created_at > datetime('now', '-1 hour')";
     $stmt = $db->prepare($resetQuery);
-    $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-    $reset = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $reset = $stmt->execute()->fetchArray(PDO::FETCH_ASSOC);
 
     if ($reset) {
         $stmt = $db->prepare("SELECT * FROM user WHERE email = :email");
-        $stmt->bindValue(':email', $reset['email'], SQLITE3_TEXT);
+        $stmt->bindValue(':email', $reset['email'], PDO::PARAM_STR);
         $result = $stmt->execute();
-        $user = $result->fetchArray(SQLITE3_ASSOC);
+        $user = $result->fetchArray(PDO::FETCH_ASSOC);
         
         if ($password == $confirmPassword) {
             // The other half of the same file. Neither write was checked and
@@ -161,8 +161,8 @@ if (isset($_POST['password']) && $_POST['password'] != "" && isset($_POST['confi
             $passwordChanged = false;
 
             if ($stmt !== false) {
-                $stmt->bindValue(':password', $passwordHash, SQLITE3_TEXT);
-                $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+                $stmt->bindValue(':password', $passwordHash, PDO::PARAM_STR);
+                $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
                 // changes() as well as the result: a statement that ran but
                 // matched no row changed no password either.
                 $passwordChanged = $stmt->execute() !== false && $db->changes() > 0;
@@ -179,7 +179,7 @@ if (isset($_POST['password']) && $_POST['password'] != "" && isset($_POST['confi
                 $stmt = $db->prepare("DELETE FROM password_resets WHERE token = :token");
 
                 if ($stmt !== false) {
-                    $stmt->bindValue(':token', $token, SQLITE3_TEXT);
+                    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
 
                     if ($stmt->execute() === false) {
                         // The password did change, so this is not a failure the

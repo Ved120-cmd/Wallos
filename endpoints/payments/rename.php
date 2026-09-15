@@ -31,9 +31,9 @@ if (strlen($name) > 255) {
 
 $sql = "UPDATE payment_methods SET name = :name WHERE id = :paymentId and user_id = :userId";
 $stmt = $db->prepare($sql);
-$stmt->bindParam(':name', $name, SQLITE3_TEXT);
-$stmt->bindParam(':paymentId', $paymentId, SQLITE3_INTEGER);
-$stmt->bindParam(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindParam(':name', $name, PDO::PARAM_STR);
+$stmt->bindParam(':paymentId', $paymentId, PDO::PARAM_INT);
+$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($result && $db->changes() > 0) {

@@ -25,10 +25,10 @@ function deleteLogoFileIfUnused($db, $filename, $logosDir)
          SELECT 1 FROM payment_methods WHERE icon = :name
          LIMIT 1'
     );
-    $stmt->bindValue(':name', $filename, SQLITE3_TEXT);
+    $stmt->bindValue(':name', $filename, PDO::PARAM_STR);
     $result = $stmt->execute();
 
-    if ($result && $result->fetchArray(SQLITE3_ASSOC)) {
+    if ($result && $result->fetchArray(PDO::FETCH_ASSOC)) {
         return; // still in use
     }
 

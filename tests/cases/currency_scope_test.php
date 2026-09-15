@@ -11,7 +11,7 @@
 /**
  * Seeds two users whose currencies overlap but whose main currency differs.
  *
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  */
 function currency_scope_fixture($db)
 {
@@ -24,7 +24,7 @@ function currency_scope_fixture($db)
 }
 
 /**
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  * @param int     $userId
  * @param string  $code
  * @return float
@@ -32,10 +32,10 @@ function currency_scope_fixture($db)
 function currency_scope_rate($db, $userId, $code)
 {
     $stmt = $db->prepare('SELECT rate FROM currencies WHERE user_id = :userId AND code = :code');
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
-    $stmt->bindValue(':code', $code, SQLITE3_TEXT);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':code', $code, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $row = $result ? $result->fetchArray(SQLITE3_ASSOC) : false;
+    $row = $result ? $result->fetchArray(PDO::FETCH_ASSOC) : false;
 
     return $row ? (float) $row['rate'] : 0.0;
 }
@@ -48,9 +48,9 @@ wallos_test('rate updates are scoped to one user', function () {
 
     // The update statement used by the refresh path.
     $stmt = $db->prepare('UPDATE currencies SET rate = :rate WHERE code = :code AND user_id = :userId');
-    $stmt->bindValue(':rate', 9.99, SQLITE3_FLOAT);
-    $stmt->bindValue(':code', 'USD', SQLITE3_TEXT);
-    $stmt->bindValue(':userId', 1, SQLITE3_INTEGER);
+    $stmt->bindValue(':rate', 9.99, PDO::PARAM_STR);
+    $stmt->bindValue(':code', 'USD', PDO::PARAM_STR);
+    $stmt->bindValue(':userId', 1, PDO::PARAM_INT);
     $stmt->execute();
 
     assert_same(9.99, currency_scope_rate($db, 1, 'USD'), "alice's rate is updated");
@@ -66,8 +66,8 @@ wallos_test('an unscoped rate update would corrupt other users', function () {
     currency_scope_fixture($db);
 
     $stmt = $db->prepare('UPDATE currencies SET rate = :rate WHERE code = :code');
-    $stmt->bindValue(':rate', 9.99, SQLITE3_FLOAT);
-    $stmt->bindValue(':code', 'USD', SQLITE3_TEXT);
+    $stmt->bindValue(':rate', 9.99, PDO::PARAM_STR);
+    $stmt->bindValue(':code', 'USD', PDO::PARAM_STR);
     $stmt->execute();
 
     assert_same(9.99, currency_scope_rate($db, 2, 'USD'), 'unscoped update reaches every user');

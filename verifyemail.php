@@ -47,10 +47,10 @@ if (isset($_GET['email']) && isset($_GET['token'])) {
 
     $query = "SELECT * FROM email_verification WHERE email = :email AND token = :token";
     $stmt = $db->prepare($query);
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-    $stmt->bindValue(':token', $token, SQLITE3_TEXT);
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
     $result = $stmt->execute();
-    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $row = $result->fetchArray(PDO::FETCH_ASSOC);
 
     if ($row) {
         // Removing the row *is* the verification: an account counts as verified
@@ -64,8 +64,8 @@ if (isset($_GET['email']) && isset($_GET['token'])) {
         $verified = false;
 
         if ($stmt !== false) {
-            $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-            $stmt->bindValue(':token', $token, SQLITE3_TEXT);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+            $stmt->bindValue(':token', $token, PDO::PARAM_STR);
             $verified = $stmt->execute() !== false;
         }
 
@@ -86,7 +86,7 @@ if (isset($_GET['email']) && isset($_GET['token'])) {
         $query = "SELECT require_email_verification FROM admin";
         $stmt = $db->prepare($query);
         $result = $stmt->execute();
-        $settings = $result->fetchArray(SQLITE3_ASSOC);
+        $settings = $result->fetchArray(PDO::FETCH_ASSOC);
 
         if ($settings['require_email_verification'] != 1) {
             header("Location: .");

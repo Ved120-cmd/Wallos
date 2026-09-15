@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "Token Pengaturan",
     "restore_database_info" => "Token pengaturan diperlukan untuk memulihkan cadangan. Ambil menggunakan salah satu metode di bawah ini:",
     "setup_token_docker" => "Docker: jalankan docker logs &lt;container-name&gt; dan cari \"Setup token for database restore\"",
-    "setup_token_file" => "Bare metal: baca file db/setup_token.db di server",
+    "setup_token_file" => "Bare metal: baca file the WALLOS_SETUP_TOKEN environment variable di server",
     "select_backup_file" => "Pilih File Cadangan",
     // Login Page
     "please_login" => "Silakan masuk",

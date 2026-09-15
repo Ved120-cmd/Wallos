@@ -15,9 +15,9 @@ if (!$aiSettings) {
 
 // User language
 $stmt = $db->prepare("SELECT language FROM user WHERE id = :user_id");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
-$userLanguage = $result->fetchArray(SQLITE3_ASSOC)['language'] ?? 'en';
+$userLanguage = $result->fetchArray(PDO::FETCH_ASSOC)['language'] ?? 'en';
 
 if ($userLanguage === 'en') {
     echo json_encode(["success" => false, "message" => translate('error', $i18n)]);
@@ -30,11 +30,11 @@ $userLanguageName = $languages[$userLanguage]['name'] ?? 'English';
 
 // Categories (id 1 is the untranslatable "No category" placeholder)
 $stmt = $db->prepare("SELECT id, name FROM categories WHERE user_id = :user_id AND id != 1");
-$stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 $categoriesToTranslate = [];
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $categoriesToTranslate[] = ['id' => (int) $row['id'], 'name' => $row['name']];
 }
 
@@ -97,9 +97,9 @@ foreach ($translated as $item) {
         continue;
     }
 
-    $update->bindValue(':name', $categoryName, SQLITE3_TEXT);
-    $update->bindValue(':id', $categoryId, SQLITE3_INTEGER);
-    $update->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+    $update->bindValue(':name', $categoryName, PDO::PARAM_STR);
+    $update->bindValue(':id', $categoryId, PDO::PARAM_INT);
+    $update->bindValue(':user_id', $userId, PDO::PARAM_INT);
     $update->execute();
     $update->reset();
 

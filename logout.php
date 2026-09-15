@@ -41,7 +41,7 @@ if (isset($_SESSION['token'])) {
         error_log('Wallos: could not prepare the login token deletion on logout; '
             . 'any browser still holding the cookie stays signed in');
     } else {
-        $stmt->bindParam(':token', $token, SQLITE3_TEXT);
+        $stmt->bindParam(':token', $token, PDO::PARAM_STR);
 
         if ($stmt->execute() === false) {
             error_log('Wallos: could not revoke the login token on logout; '

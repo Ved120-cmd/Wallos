@@ -18,8 +18,8 @@ if ($recommendationId <= 0) {
 
 // Delete the recommendation for the user
 $stmt = $db->prepare("DELETE FROM ai_recommendations WHERE id = ? AND user_id = ?");
-$stmt->bindValue(1, $recommendationId, SQLITE3_INTEGER);
-$stmt->bindValue(2, $userId, SQLITE3_INTEGER);
+$stmt->bindValue(1, $recommendationId, PDO::PARAM_INT);
+$stmt->bindValue(2, $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
 if ($db->changes() > 0) {

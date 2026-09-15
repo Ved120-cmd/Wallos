@@ -7,7 +7,7 @@
 $sql = "SELECT avatar FROM user";
 $stmt = $db->prepare($sql);
 $result = $stmt->execute();
-$row = $result->fetchArray(SQLITE3_ASSOC);
+$row = $result->fetchArray(PDO::FETCH_ASSOC);
 
 if ($row) {
     $avatar = $row['avatar'];
@@ -16,7 +16,7 @@ if ($row) {
         $avatarFullPath = "images/avatars/" . $avatar . ".svg";
         $sql = "UPDATE user SET avatar = :avatarFullPath";
         $stmt = $db->prepare($sql);
-        $stmt->bindValue(':avatarFullPath', $avatarFullPath, SQLITE3_TEXT);
+        $stmt->bindValue(':avatarFullPath', $avatarFullPath, PDO::PARAM_STR);
         $stmt->execute();
     }
 }

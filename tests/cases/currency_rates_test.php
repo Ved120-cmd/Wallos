@@ -6,7 +6,7 @@
 require_once WALLOS_ROOT . '/includes/currency_rates.php';
 
 /**
- * @param SQLite3 $db
+ * @param WallosDatabase $db
  */
 function currency_rates_fixture($db)
 {
@@ -42,8 +42,8 @@ wallos_test('conversion produces the same result as a direct rate lookup', funct
     $usd = wallos_test_currency_id(1, 1);
 
     $stmt = $db->prepare('SELECT rate FROM currencies WHERE id = :id');
-    $stmt->bindValue(':id', $usd, SQLITE3_INTEGER);
-    $rate = (float) $stmt->execute()->fetchArray(SQLITE3_ASSOC)['rate'];
+    $stmt->bindValue(':id', $usd, PDO::PARAM_INT);
+    $rate = (float) $stmt->execute()->fetchArray(PDO::FETCH_ASSOC)['rate'];
 
     assert_same(11.0 / $rate, wallos_convert_price(11.0, $usd, $db, 1),
         'the converted value is unchanged');
@@ -70,7 +70,7 @@ wallos_test('a zero rate leaves the price untouched', function () {
 
     $usd = wallos_test_currency_id(1, 1);
     $stmt = $db->prepare('UPDATE currencies SET rate = 0 WHERE id = :id');
-    $stmt->bindValue(':id', $usd, SQLITE3_INTEGER);
+    $stmt->bindValue(':id', $usd, PDO::PARAM_INT);
     $stmt->execute();
 
     assert_same(9.99, wallos_convert_price(9.99, $usd, $db, 1),

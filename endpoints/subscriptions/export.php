@@ -14,10 +14,10 @@ $subscriptions = array();
 
 $query = "SELECT * FROM subscriptions WHERE user_id = :userId";
 $stmt = $db->prepare($query);
-$stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+$stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
     $cycle = $cycles[$row['cycle']]['name'];
     $frequency =$row['frequency'];
 

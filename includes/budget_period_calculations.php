@@ -256,14 +256,14 @@ if (!function_exists('getSubscriptionOccurrencesInRange')) {
 }
 
 if (!function_exists('convertPriceToMainCurrency')) {
-    function convertPriceToMainCurrency($price, $currencyId, SQLite3 $database, $userId)
+    function convertPriceToMainCurrency($price, $currencyId, WallosDatabase $database, $userId)
     {
         return wallos_convert_price($price, $currencyId, $database, $userId);
     }
 }
 
 if (!function_exists('computeAmountNeededInPeriod')) {
-    function computeAmountNeededInPeriod(array $subscriptions, DateTime $today, DateTime $periodEnd, SQLite3 $database, $userId)
+    function computeAmountNeededInPeriod(array $subscriptions, DateTime $today, DateTime $periodEnd, WallosDatabase $database, $userId)
     {
         $rangeStart = createDateAtMidnight($today);
         $amountNeeded = 0.0;

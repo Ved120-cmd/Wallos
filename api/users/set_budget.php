@@ -42,9 +42,9 @@ if (!$apiKey) {
 
 $sql = "SELECT id FROM user WHERE api_key = :apiKey";
 $stmt = $db->prepare($sql);
-$stmt->bindValue(':apiKey', $apiKey, SQLITE3_TEXT);
+$stmt->bindValue(':apiKey', $apiKey, PDO::PARAM_STR);
 $result = $stmt->execute();
-$user = $result ? $result->fetchArray(SQLITE3_ASSOC) : false;
+$user = $result ? $result->fetchArray(PDO::FETCH_ASSOC) : false;
 
 if (!$user) {
     echo json_encode([
@@ -84,7 +84,7 @@ if ($hasMonthlyBudget) {
 
     $monthlyBudget = max(0, (float) $monthlyBudgetRaw);
     $sets[] = 'budget = :monthlyBudget';
-    $binds[':monthlyBudget'] = ['value' => $monthlyBudget, 'type' => SQLITE3_FLOAT];
+    $binds[':monthlyBudget'] = ['value' => $monthlyBudget, 'type' => PDO::PARAM_STR];
 }
 
 if ($hasPeriodBudget || $hasPeriodMeta) {
@@ -101,16 +101,16 @@ if ($hasPeriodBudget || $hasPeriodMeta) {
 
         $periodBudget = max(0, (float) $periodBudgetRaw);
         $sets[] = 'period_budget = :periodBudget';
-        $binds[':periodBudget'] = ['value' => $periodBudget, 'type' => SQLITE3_FLOAT];
+        $binds[':periodBudget'] = ['value' => $periodBudget, 'type' => PDO::PARAM_STR];
     }
 
     $periodType = sanitizeBudgetPeriodType($payload['budget_period_type'] ?? 'monthly');
     $anchorDate = sanitizeBudgetAnchorDate($payload['budget_period_anchor_date'] ?? getDefaultBudgetAnchorDate());
 
     $sets[] = 'budget_period_type = :periodType';
-    $binds[':periodType'] = ['value' => $periodType, 'type' => SQLITE3_TEXT];
+    $binds[':periodType'] = ['value' => $periodType, 'type' => PDO::PARAM_STR];
     $sets[] = 'budget_period_anchor_date = :anchorDate';
-    $binds[':anchorDate'] = ['value' => $anchorDate, 'type' => SQLITE3_TEXT];
+    $binds[':anchorDate'] = ['value' => $anchorDate, 'type' => PDO::PARAM_STR];
 }
 
 $updateSql = "UPDATE user SET " . implode(', ', $sets) . " WHERE id = :userId";
@@ -120,7 +120,7 @@ foreach ($binds as $key => $bind) {
     $updateStmt->bindValue($key, $bind['value'], $bind['type']);
 }
 
-$updateStmt->bindValue(':userId', (int) $user['id'], SQLITE3_INTEGER);
+$updateStmt->bindValue(':userId', (int) $user['id'], PDO::PARAM_INT);
 $updateResult = $updateStmt->execute();
 
 if ($updateResult) {

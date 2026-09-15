@@ -20,7 +20,7 @@ $i18n = [
     "setup_token" => "设置令牌",
     "restore_database_info" => "恢复备份需要设置令牌。请使用以下方法之一获取：",
     "setup_token_docker" => "Docker：运行 docker logs &lt;container-name&gt; 并查找 \"Setup token for database restore\"",
-    "setup_token_file" => "裸机：在服务器上读取文件 db/setup_token.db",
+    "setup_token_file" => "裸机：在服务器上读取文件 the WALLOS_SETUP_TOKEN environment variable",
     "select_backup_file" => "选择备份文件",
     // 登录页面
     "please_login" => "请登录",

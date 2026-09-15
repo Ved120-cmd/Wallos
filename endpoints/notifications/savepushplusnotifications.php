@@ -18,7 +18,7 @@ require_once '../../includes/validate_endpoint.php';
 
         $query = "SELECT COUNT(*) FROM pushplus_notifications WHERE user_id = :userId";
         $stmt = $db->prepare($query);
-        $stmt->bindParam(":userId", $userId, SQLITE3_INTEGER);
+        $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
         $result = $stmt->execute();
 
         if ($result === false) {
@@ -39,9 +39,9 @@ require_once '../../includes/validate_endpoint.php';
             }
 
             $stmt = $db->prepare($query);
-            $stmt->bindValue(':enabled', $enabled, SQLITE3_INTEGER);
-            $stmt->bindValue(':token', $token, SQLITE3_TEXT);
-            $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(':enabled', $enabled, PDO::PARAM_INT);
+            $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
                 $response = [

@@ -20,11 +20,11 @@ if (!isset($_GET['search']) || trim($_GET['search']) === '') {
 }
 
 $apiKey = '';
-if ($db->querySingle("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='google_search'") > 0) {
+if ($db->querySingle("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'google_search'") > 0) {
     $stmt = $db->prepare("SELECT api_key FROM google_search WHERE user_id = :userId");
-    $stmt->bindValue(':userId', $userId, SQLITE3_INTEGER);
+    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
     $result = $stmt->execute();
-    if ($result && ($row = $result->fetchArray(SQLITE3_ASSOC))) {
+    if ($result && ($row = $result->fetchArray(PDO::FETCH_ASSOC))) {
         $apiKey = $row['api_key'];
     }
 }

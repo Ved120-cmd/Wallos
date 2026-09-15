@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':apiKey', $apiKey);
     $result = $stmt->execute();
-    $user = $result->fetchArray(SQLITE3_ASSOC);
+    $user = $result->fetchArray(PDO::FETCH_ASSOC);
     // If the user is not found or the API key is invalid, return an error
     if (!$user) {
         echo json_encode([
@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
 
     $sql = "SELECT * FROM last_exchange_update";
     $result = $db->query($sql);
-    $lastExchangeUpdate = $result->fetchArray(SQLITE3_ASSOC);
+    $lastExchangeUpdate = $result->fetchArray(PDO::FETCH_ASSOC);
 
     $userId = $user['id'];
     $userCurrencyId = $user['main_currency'];
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt = $db->prepare($sql);
     $stmt->bindValue(':currencyId', $userCurrencyId);
     $result = $stmt->execute();
-    $currency = $result->fetchArray(SQLITE3_ASSOC);
+    $currency = $result->fetchArray(PDO::FETCH_ASSOC);
     $currency_code = $currency['code'];
     $currency_symbol = $currency['symbol'];
 
@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
     $stmt->bindValue(':userId', $userId);
     $result = $stmt->execute();
     $subscriptions = [];
-    while ($subscription = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($subscription = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $subscriptions[] = $subscription;
         if ($subscription['currency_id'] !== $userCurrencyId) {
             $needsCurrencyConversion = true;
@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" || $_SERVER["REQUEST_METHOD"] === "GET
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':userId', $userId);
             $result = $stmt->execute();
-            while ($currency = $result->fetchArray(SQLITE3_ASSOC)) {
+            while ($currency = $result->fetchArray(PDO::FETCH_ASSOC)) {
                 $currencies[$currency['id']] = $currency['rate'];
             }
         }
