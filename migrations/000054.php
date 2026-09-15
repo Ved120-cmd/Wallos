@@ -10,7 +10,7 @@ if ($failedAttemptsColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE totp ADD COLUMN failed_attempts INTEGER DEFAULT 0');
 }
 
-$lockoutUntilColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'totp' AND column_name = 'failed_attempts'");
+$lockoutUntilColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'totp' AND column_name = 'lockout_until'");
 if ($lockoutUntilColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE totp ADD COLUMN lockout_until INTEGER DEFAULT 0');
 }

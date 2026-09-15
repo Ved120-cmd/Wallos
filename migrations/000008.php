@@ -5,6 +5,6 @@ $columnQuery = $db->query("SELECT column_name AS name FROM information_schema.co
 $columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
-    $db->exec('ALTER TABLE subscriptions ADD COLUMN inactive INTEGER DEFAULT false');
-    $db->exec('UPDATE subscriptions SET inactive = false');
+    $db->exec('ALTER TABLE subscriptions ADD COLUMN inactive INTEGER DEFAULT 0');
+    $db->exec('UPDATE subscriptions SET inactive = 0');
 }

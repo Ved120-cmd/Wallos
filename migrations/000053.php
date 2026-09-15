@@ -15,17 +15,17 @@ $db->exec('UPDATE notification_settings
 
 $defaultAnchorDate = (new DateTime('now'))->format('Y-m-d');
 
-$periodTypeColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+$periodTypeColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'user' AND column_name = 'budget_period_type'");
 if ($periodTypeColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
-    $db->exec('ALTER TABLE user ADD COLUMN budget_period_type TEXT DEFAULT "monthly"');
+    $db->exec("ALTER TABLE user ADD COLUMN budget_period_type TEXT DEFAULT 'monthly'");
 }
 
-$anchorDateColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+$anchorDateColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'user' AND column_name = 'budget_period_anchor_date'");
 if ($anchorDateColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
-    $db->exec('ALTER TABLE user ADD COLUMN budget_period_anchor_date TEXT DEFAULT "' . $defaultAnchorDate . '"');
+    $db->exec("ALTER TABLE user ADD COLUMN budget_period_anchor_date TEXT DEFAULT '" . $defaultAnchorDate . "'");
 }
 
-$periodBudgetColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'notification_settings' AND column_name = 'period_summary_at_period_start'");
+$periodBudgetColumn = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'user' AND column_name = 'period_budget'");
 if ($periodBudgetColumn->fetchArray(PDO::FETCH_ASSOC) === false) {
     $db->exec('ALTER TABLE user ADD COLUMN period_budget REAL DEFAULT 0');
 }

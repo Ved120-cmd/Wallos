@@ -9,7 +9,7 @@ if ($columnRequired) {
     $db->exec('ALTER TABLE admin ADD COLUMN oidc_oauth_enabled INTEGER DEFAULT 0');
 }
 
-$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'admin' AND column_name = 'oidc_oauth_enabled'");
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'user' AND column_name = 'oidc_sub'");
 $columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 if ($columnRequired) {
     $db->exec('ALTER TABLE user ADD COLUMN oidc_sub TEXT');

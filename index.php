@@ -82,7 +82,7 @@ $upcomingSubscriptions = get_upcoming_payments(
 );
 
 // Fetch enabled subscriptions with manual renewal that are overdue
-$stmt = $db->prepare("SELECT id, logo, logo_text_color, logo_variant, name, price, currency_id, next_payment, inactive, auto_renew FROM subscriptions WHERE user_id = :userId AND next_payment < date('now') AND auto_renew = 0 AND inactive = 0 AND cycle != 5 ORDER BY next_payment ASC");
+$stmt = $db->prepare("SELECT id, logo, logo_text_color, logo_variant, name, price, currency_id, next_payment, inactive, auto_renew FROM subscriptions WHERE user_id = :userId AND next_payment < CURRENT_DATE AND auto_renew = 0 AND inactive = 0 AND cycle != 5 ORDER BY next_payment ASC");
 $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
 $result = $stmt->execute();
 $overdueSubscriptions = [];

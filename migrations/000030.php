@@ -14,7 +14,7 @@ if ($columnRequired) {
 
 // Add the ignore_ssl column to the ntfy_notifications table
 
-$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'ignore_ssl'");
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'ntfy_notifications' AND column_name = 'ignore_ssl'");
 $columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
@@ -23,7 +23,7 @@ if ($columnRequired) {
 
 // Add the ignore_ssl column to the gotify_notifications table
 
-$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'webhook_notifications' AND column_name = 'ignore_ssl'");
+$columnQuery = $db->query("SELECT column_name AS name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'gotify_notifications' AND column_name = 'ignore_ssl'");
 $columnRequired = $columnQuery->fetchArray(PDO::FETCH_ASSOC) === false;
 
 if ($columnRequired) {
