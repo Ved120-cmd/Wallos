@@ -42,26 +42,6 @@ if ($userCount == 0) {
     }
 }
 
-if ($userCount > 0) {
-    $stmt = $db->prepare('SELECT * FROM admin');
-    $result = $stmt->execute();
-    $settings = $result->fetchArray(PDO::FETCH_ASSOC);
-
-    if ($settings['registrations_open'] == 0) {
-        header("Location: login.php");
-        exit();
-    }
-
-    if ($settings['max_users'] != 0) {
-
-        if ($userCount >= $settings['max_users']) {
-            header("Location: login.php");
-            exit();
-        }
-    }
-}
-
-
 $theme = "light";
 $updateThemeSettings = false;
 if (isset($_COOKIE['theme'])) {

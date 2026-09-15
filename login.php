@@ -451,16 +451,10 @@ if (isset($_GET['error'])) {
                     <?php
                 }
                 ?>
-                <?php
-                if ($registrations) {
-                    ?>
-                    <div class="login-form-link account-switch">
-                        <span><?= translate('no_account_yet', $i18n) ?></span>
-                        <a href="registration.php"><?= translate('register', $i18n) ?></a>
-                    </div>
-                    <?php
-                }
-                ?>
+                <div class="login-form-link account-switch">
+                    <span><?= translate('no_account_yet', $i18n) ?></span>
+                    <a href="registration.php"><?= translate('register', $i18n) ?></a>
+                </div>
             </form>
         </section>
     </div>
