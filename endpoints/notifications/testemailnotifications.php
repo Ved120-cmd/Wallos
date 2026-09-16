@@ -1,170 +1,55 @@
 <?php
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 require_once '../../includes/connect_endpoint.php';
 require_once '../../includes/validate_endpoint.php';
-require_once '../../includes/ssrf_helper.php';
 require_once '../../includes/gmail_api_mailer.php';
 
 $postData = file_get_contents("php://input");
 $data = json_decode($postData, true);
 
-$authMethod = isset($data["authmethod"]) && $data["authmethod"] === "gmail_api" ? "gmail_api" : "smtp";
-
-if ($authMethod === "gmail_api") {
-    if (
-        !isset($data["gmailclientid"]) || $data["gmailclientid"] == "" ||
-        !isset($data["gmailclientsecret"]) || $data["gmailclientsecret"] == "" ||
-        !isset($data["gmailrefreshtoken"]) || $data["gmailrefreshtoken"] == ""
-    ) {
-        die(json_encode([
-            "success" => false,
-            "message" => translate('fill_all_fields', $i18n)
-        ]));
-    }
-
-    $userStmt = $db->prepare('SELECT email, username FROM user WHERE id = :userId');
-    $userStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
-    $userResult = $userStmt->execute();
-    $user = $userResult ? $userResult->fetchArray(PDO::FETCH_ASSOC) : false;
-
-    if ($user === false || empty($user['email'])) {
-        die(json_encode([
-            "success" => false,
-            "message" => translate('error', $i18n)
-        ]));
-    }
-
-    try {
-        send_gmail_api_message(
-            $data["gmailclientid"],
-            $data["gmailclientsecret"],
-            $data["gmailrefreshtoken"],
-            $data["fromemail"] ?? "",
-            'Wallos App',
-            [['email' => $user['email'], 'name' => $user['username']]],
-            [],
-            translate('wallos_notification', $i18n),
-            translate('test_notification', $i18n)
-        );
-
-        die(json_encode([
-            "success" => true,
-            "message" => translate('notification_sent_successfuly', $i18n)
-        ]));
-    } catch (GmailApiMailerException $e) {
-        die(json_encode([
-            "success" => false,
-            "message" => translate('email_error', $i18n) . $e->getMessage()
-        ]));
-    }
-}
-
 if (
-    !isset($data["smtpaddress"]) || $data["smtpaddress"] == "" ||
-    !isset($data["smtpport"]) || $data["smtpport"] == ""
+    !isset($data["gmailclientid"]) || $data["gmailclientid"] == "" ||
+    !isset($data["gmailclientsecret"]) || $data["gmailclientsecret"] == "" ||
+    !isset($data["gmailrefreshtoken"]) || $data["gmailrefreshtoken"] == ""
 ) {
-    $response = [
+    die(json_encode([
         "success" => false,
         "message" => translate('fill_all_fields', $i18n)
-    ];
-    die(json_encode($response));
-} else {
-    $encryption = "none";
-    if (isset($data["encryption"])) {
-        $encryption = $data["encryption"];
-    }
+    ]));
+}
 
-    $smtpAuth = (isset($data["smtpusername"]) && $data["smtpusername"] != "") || (isset($data["smtppassword"]) && $data["smtppassword"] != "");
+$userStmt = $db->prepare('SELECT email, username FROM user WHERE id = :userId');
+$userStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+$userResult = $userStmt->execute();
+$user = $userResult ? $userResult->fetchArray(PDO::FETCH_ASSOC) : false;
 
-    require '../../libs/PHPMailer/PHPMailer.php';
-    require '../../libs/PHPMailer/SMTP.php';
-    require '../../libs/PHPMailer/Exception.php';
+if ($user === false || empty($user['email'])) {
+    die(json_encode([
+        "success" => false,
+        "message" => translate('error', $i18n)
+    ]));
+}
 
-    $smtpAddress = $data["smtpaddress"];
-    $smtpPort = (int) $data["smtpport"];
+try {
+    send_gmail_api_message(
+        $data["gmailclientid"],
+        $data["gmailclientsecret"],
+        $data["gmailrefreshtoken"],
+        $data["fromemail"] ?? "",
+        'Wallos App',
+        [['email' => $user['email'], 'name' => $user['username']]],
+        [],
+        translate('wallos_notification', $i18n),
+        translate('test_notification', $i18n)
+    );
 
-    if (!validate_smtp_host($smtpAddress, $smtpPort, $db)) {
-        die(json_encode([
-            "success" => false,
-            "message" => "Security Error: SMTP host must not target link-local or loopback addresses."
-        ]));
-    }
-
-    if ($smtpPort < 1 || $smtpPort > 65535) {
-        die(json_encode([
-            "success" => false,
-            "message" => translate('fill_all_fields', $i18n)
-        ]));
-    }
-    $smtpUsername = $data["smtpusername"];
-    $smtpPassword = $data["smtppassword"];
-    $fromEmail = $data["fromemail"] ? $data['fromemail'] : "wallos@wallosapp.com";
-
-    $mail = new PHPMailer(true);
-    $mail->CharSet = "UTF-8";
-    $mail->isSMTP();
-    $mail->Timeout = 15;
-
-    $mail->Host = $smtpAddress;
-    $mail->SMTPAuth = $smtpAuth;
-    if ($smtpAuth) {
-        $mail->Username = $smtpUsername;
-        $mail->Password = $smtpPassword;
-    }
-
-    if ($encryption != "none") {
-        $mail->SMTPSecure = $encryption;
-    } else {
-        $mail->SMTPSecure = false;
-        $mail->SMTPAutoTLS = false;
-    }
-
-    $mail->Port = $smtpPort;
-
-    $userStmt = $db->prepare('SELECT email, username FROM user WHERE id = :userId');
-    $userStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
-    $userResult = $userStmt->execute();
-    $user = $userResult ? $userResult->fetchArray(PDO::FETCH_ASSOC) : false;
-
-    if ($user === false || empty($user['email'])) {
-        die(json_encode([
-            "success" => false,
-            "message" => translate('error', $i18n)
-        ]));
-    }
-
-    $email = $user['email'];
-    $name = $user['username'];
-
-    $mail->setFrom($fromEmail, 'Wallos App');
-    $mail->addAddress($email, $name);
-
-    $mail->Subject = translate('wallos_notification', $i18n);
-    $mail->Body = translate('test_notification', $i18n);
-
-    try {
-        if ($mail->send()) {
-            $response = [
-                "success" => true,
-                "message" => translate('notification_sent_successfuly', $i18n)
-            ];
-        } else {
-            $response = [
-                "success" => false,
-                "message" => translate('email_error', $i18n) . $mail->ErrorInfo
-            ];
-        }
-    } catch (Exception $e) {
-        $response = [
-            "success" => false,
-            "message" => translate('email_error', $i18n) . $e->getMessage()
-        ];
-    }
-
-    die(json_encode($response));
-
+    die(json_encode([
+        "success" => true,
+        "message" => translate('notification_sent_successfuly', $i18n)
+    ]));
+} catch (GmailApiMailerException $e) {
+    die(json_encode([
+        "success" => false,
+        "message" => translate('email_error', $i18n) . $e->getMessage()
+    ]));
 }

@@ -1,16 +1,9 @@
 <?php
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
 
 require_once 'validate.php';
 require_once __DIR__ . '/../../includes/connect_endpoint_crontabs.php';
 require_once __DIR__ . '/../../includes/ssrf_helper.php';
 require_once __DIR__ . '/../../includes/webhook_helper.php';
-
-require __DIR__ . '/../../libs/PHPMailer/PHPMailer.php';
-require __DIR__ . '/../../libs/PHPMailer/SMTP.php';
-require __DIR__ . '/../../libs/PHPMailer/Exception.php';
 
 require __DIR__ . '/../../includes/currency_formatter.php';
 require __DIR__ . '/../../includes/budget_period_calculations.php';
@@ -125,13 +118,7 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
 
     if ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $emailNotificationsEnabled = $row['enabled'];
-        $email['authMethod'] = $row['auth_method'] ?? 'smtp';
-        $email['smtpAddress'] = $row["smtp_address"];
-        $email['smtpPort'] = $row["smtp_port"];
-        $email['encryption'] = $row["encryption"];
-        $email['smtpUsername'] = $row["smtp_username"];
-        $email['smtpPassword'] = $row["smtp_password"];
-        $email['fromEmail'] = $row["from_email"] ? $row["from_email"] : ($email['authMethod'] === 'gmail_api' ? "" : "wallos@wallosapp.com");
+        $email['fromEmail'] = $row["from_email"] ?? "";
         $email['otherEmails'] = $row["other_emails"];
         $email['gmailClientId'] = $row['gmail_client_id'] ?? '';
         $email['gmailClientSecret'] = $row['gmail_client_secret'] ?? '';
@@ -384,15 +371,6 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
 
             // Email notifications if enabled
             if ($emailNotificationsEnabled) {
-                $useGmailApi = $email['authMethod'] === 'gmail_api';
-
-                // Re-validate at send time: a save-time check alone is bypassable via
-                // DNS rebinding between when the host was saved and when the cron fires.
-                // Not applicable to the Gmail API path - there's no SMTP host to pin.
-                if (!$useGmailApi && !validate_smtp_host($email['smtpAddress'], (int) $email['smtpPort'], $db)) {
-                    echo "SSRF attempt detected for SMTP host. Email notifications not sent.<br />";
-                } else {
-
                 $stmt = $db->prepare('SELECT * FROM user WHERE id = :user_id');
                 $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
                 $result = $stmt->execute();
@@ -427,66 +405,22 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
                         $ccEmails = array_map('trim', $list);
                     }
 
-                    if ($useGmailApi) {
-                        try {
-                            send_gmail_api_message(
-                                $email['gmailClientId'],
-                                $email['gmailClientSecret'],
-                                $email['gmailRefreshToken'],
-                                $email['fromEmail'],
-                                'Wallos App',
-                                [['email' => $emailaddress, 'name' => $name]],
-                                $ccEmails,
-                                'Wallos Notification',
-                                $message
-                            );
-                            echo "Email Notifications sent (Gmail API)<br />";
-                        } catch (GmailApiMailerException $e) {
-                            echo "Error sending notifications: " . $e->getMessage() . "<br />";
-                        }
-                        continue;
+                    try {
+                        send_gmail_api_message(
+                            $email['gmailClientId'],
+                            $email['gmailClientSecret'],
+                            $email['gmailRefreshToken'],
+                            $email['fromEmail'],
+                            'Wallos App',
+                            [['email' => $emailaddress, 'name' => $name]],
+                            $ccEmails,
+                            'Wallos Notification',
+                            $message
+                        );
+                        echo "Email Notifications sent (Gmail API)<br />";
+                    } catch (GmailApiMailerException $e) {
+                        echo "Error sending notifications: " . $e->getMessage() . "<br />";
                     }
-
-                    $smtpAuth = (isset($email["smtpUsername"]) && $email["smtpUsername"] != "") || (isset($email["smtpPassword"]) && $email["smtpPassword"] != "");
-
-                    $mail = new PHPMailer(true);
-                    $mail->CharSet = "UTF-8";
-                    $mail->isSMTP();
-                    $mail->Timeout = 15;
-
-                    $mail->Host = $email['smtpAddress'];
-                    $mail->SMTPAuth = $smtpAuth;
-
-                    if ($smtpAuth) {
-                        $mail->Username = $email['smtpUsername'];
-                        $mail->Password = $email['smtpPassword'];
-                    }
-
-                    if ($email['encryption'] != "none") {
-                        $mail->SMTPSecure = $email['encryption'];
-                    } else {
-                        $mail->SMTPSecure = false;
-                        $mail->SMTPAutoTLS = false;
-                    }
-
-                    $mail->Port = $email['smtpPort'];
-
-                    $mail->setFrom($email['fromEmail'], 'Wallos App');
-                    $mail->addAddress($emailaddress, $name);
-
-                    foreach ($ccEmails as $value) {
-                        $mail->addCC($value);
-                    }
-
-                    $mail->Subject = 'Wallos Notification';
-                    $mail->Body = $message;
-
-                    if ($mail->send()) {
-                        echo "Email Notifications sent<br />";
-                    } else {
-                        echo "Error sending notifications: " . $mail->ErrorInfo . "<br />";
-                    }
-                }
                 }
             }
 

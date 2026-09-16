@@ -519,59 +519,7 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                         <input type="checkbox" id="emailenabled" name="emailenabled" <?= $notificationsEmail['enabled'] ? "checked" : "" ?>>
                         <label for="emailenabled" class="capitalize"><?= translate('enabled', $i18n) ?></label>
                     </div>
-                    <div class="form-group-inline">
-                        <div>
-                            <input type="radio" name="authmethod" id="authmethodsmtp" value="smtp"
-                                onchange="toggleEmailAuthMethod()"
-                                <?= ($notificationsEmail['auth_method'] ?? 'smtp') == "smtp" ? "checked" : "" ?> />
-                            <label for="authmethodsmtp">SMTP</label>
-                        </div>
-                        <div>
-                            <input type="radio" name="authmethod" id="authmethodgmailapi" value="gmail_api"
-                                onchange="toggleEmailAuthMethod()"
-                                <?= ($notificationsEmail['auth_method'] ?? 'smtp') == "gmail_api" ? "checked" : "" ?> />
-                            <label for="authmethodgmailapi">Gmail API</label>
-                        </div>
-                    </div>
-                    <div id="smtpAuthFields">
-                        <div class="form-group-inline">
-                            <input type="text" name="smtpaddress" id="smtpaddress" autocomplete="off"
-                                placeholder="<?= translate('smtp_address', $i18n) ?>"
-                                value="<?= htmlspecialchars($notificationsEmail['smtp_address']) ?>" />
-                            <input type="text" name="smtpport" id="smtpport" autocomplete="off"
-                                placeholder="<?= translate('port', $i18n) ?>" class="one-third"
-                                value="<?= htmlspecialchars($notificationsEmail['smtp_port']) ?>" />
-                        </div>
-                        <div class="form-group-inline">
-                            <div>
-                                <input type="radio" name="encryption" id="encryptionnone" value="none"
-                                    <?= empty($notificationsEmail['encryption']) || $notificationsEmail['encryption'] == "none" ? "checked" : "" ?> />
-                                <label for="encryptionnone"><?= translate('none', $i18n) ?></label>
-                            </div>
-                            <div>
-                                <input type="radio" name="encryption" id="encryptiontls" value="tls"
-                                    <?= $notificationsEmail['encryption'] == "tls" ? "checked" : "" ?> />
-                                <label for="encryptiontls"><?= translate('tls', $i18n) ?></label>
-                            </div>
-                            <div>
-                                <input type="radio" name="encryption" id="encryptionssl" value="ssl"
-                                    <?= $notificationsEmail['encryption'] == "ssl" ? "checked" : "" ?> />
-                                <label for="encryptionssl"><?= translate('ssl', $i18n) ?></label>
-                            </div>
-
-
-                        </div>
-                        <div class="form-group-inline">
-                            <input type="text" name="smtpusername" id="smtpusername" autocomplete="off"
-                                placeholder="<?= translate('smtp_username', $i18n) ?>"
-                                value="<?= htmlspecialchars($notificationsEmail['smtp_username']) ?>" />
-                        </div>
-                        <div class="form-group-inline">
-                            <input type="password" name="smtppassword" id="smtppassword" autocomplete="off"
-                                placeholder="<?= translate('smtp_password', $i18n) ?>"
-                                value="<?= htmlspecialchars($notificationsEmail['smtp_password']) ?>" />
-                        </div>
-                    </div>
+                    <input type="hidden" name="authmethod" id="authmethod" value="gmail_api" />
                     <div id="gmailApiAuthFields">
                         <details class="settings-notes gmail-api-help">
                             <summary><i class="fa-solid fa-circle-question"></i> How to get these values</summary>
@@ -630,15 +578,6 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                         <input type="submit" class="thin mobile-grow" value="<?= translate('save', $i18n) ?>"
                             id="saveNotificationsEmail" onClick="saveNotificationsEmailButton()" />
                     </div>
-                    <div class="settings-notes">
-                        <p>
-                            <i class="fa-solid fa-circle-info"></i> <?= translate('smtp_info', $i18n) ?>
-                        </p>
-                        <p>
-                    </div>
-                    <script type="text/javascript">
-                        toggleEmailAuthMethod();
-                    </script>
                 </div>
             </section>
             <section class="account-notifications-section">
