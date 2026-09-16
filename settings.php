@@ -522,7 +522,7 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                     <div class="form-group-inline">
                         <div>
                             <input type="radio" name="encryption" id="encryptionnone" value="none"
-                                <?= $notificationsEmail['encryption'] == "none" ? "checked" : "" ?> />
+                                <?= empty($notificationsEmail['encryption']) || $notificationsEmail['encryption'] == "none" ? "checked" : "" ?> />
                             <label for="encryptionnone"><?= translate('none', $i18n) ?></label>
                         </div>
                         <div>

@@ -338,7 +338,7 @@ $loginDisabledAllowed = $userCount == 1 && $settings['registrations_open'] == 0;
             <div class="buttons">
                 <input type="button" class="secondary-button thin mobile-grow" value="<?= translate('test', $i18n) ?>"
                     id="testSmtpSettingsButton" onClick="testSmtpSettingsButton()" />
-                <input type="submit" class="thin mobile-grow" value="<?= translate('save', $i18n) ?>"
+                <input type="button" class="thin mobile-grow" value="<?= translate('save', $i18n) ?>"
                     id="saveSmtpSettingsButton" onClick="saveSmtpSettingsButton()" />
             </div>
             <div class="settings-notes">

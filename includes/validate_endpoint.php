@@ -17,6 +17,13 @@ if (!verify_csrf_token($csrf)) {
 }
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    require_once __DIR__ . '/remember_me.php';
+    if (isset($db)) {
+        restoreSessionFromRememberMeCookie($db);
+    }
+}
+
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     echo json_encode(["success" => false, "message" => translate('session_expired', $i18n)]);
     exit;
 }

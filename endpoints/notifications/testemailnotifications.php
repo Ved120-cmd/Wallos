@@ -73,8 +73,18 @@ if (
 
     $mail->Port = $smtpPort;
 
-    $getUser = "SELECT * FROM user WHERE id = $userId";
-    $user = $db->querySingle($getUser, true);
+    $userStmt = $db->prepare('SELECT email, username FROM user WHERE id = :userId');
+    $userStmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $userResult = $userStmt->execute();
+    $user = $userResult ? $userResult->fetchArray(PDO::FETCH_ASSOC) : false;
+
+    if ($user === false || empty($user['email'])) {
+        die(json_encode([
+            "success" => false,
+            "message" => translate('error', $i18n)
+        ]));
+    }
+
     $email = $user['email'];
     $name = $user['username'];
 

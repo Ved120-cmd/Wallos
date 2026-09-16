@@ -7,7 +7,7 @@ function makeFetchCall(url, data, button) {
     },
     body: JSON.stringify(data),
   })
-    .then(response => response.json())
+    .then(response => parseJsonResponse(response))
     .then(data => {
       if (data.success) {
         showSuccessMessage(data.message);
@@ -17,7 +17,7 @@ function makeFetchCall(url, data, button) {
       button.disabled = false;
     })
     .catch((error) => {
-      showErrorMessage(error);
+      showErrorMessage(error.message || String(error));
       button.disabled = false;
     });
 
@@ -27,69 +27,78 @@ function testSmtpSettingsButton() {
   const button = document.getElementById("testSmtpSettingsButton");
   button.disabled = true;
 
-  const smtpAddress = document.getElementById("smtpaddress").value;
-  const smtpPort = document.getElementById("smtpport").value;
-  const encryption = document.querySelector('input[name="encryption"]:checked').value;
-  const smtpUsername = document.getElementById("smtpusername").value;
-  const smtpPassword = document.getElementById("smtppassword").value;
-  const fromEmail = document.getElementById("fromemail").value;
+  try {
+    const smtpAddress = document.getElementById("smtpaddress").value;
+    const smtpPort = document.getElementById("smtpport").value;
+    const encryption = getSelectedEncryption();
+    const smtpUsername = document.getElementById("smtpusername").value;
+    const smtpPassword = document.getElementById("smtppassword").value;
+    const fromEmail = document.getElementById("fromemail").value;
 
-  const data = {
-    smtpaddress: smtpAddress,
-    smtpport: smtpPort,
-    encryption: encryption,
-    smtpusername: smtpUsername,
-    smtppassword: smtpPassword,
-    fromemail: fromEmail
-  };
+    const data = {
+      smtpaddress: smtpAddress,
+      smtpport: smtpPort,
+      encryption: encryption,
+      smtpusername: smtpUsername,
+      smtppassword: smtpPassword,
+      fromemail: fromEmail
+    };
 
-  makeFetchCall('endpoints/notifications/testemailnotifications.php', data, button);
+    makeFetchCall('endpoints/notifications/testemailnotifications.php', data, button);
+  } catch (error) {
+    showErrorMessage(error.message || String(error));
+    button.disabled = false;
+  }
 }
 
 function saveSmtpSettingsButton() {
   const button = document.getElementById("saveSmtpSettingsButton");
   button.disabled = true;
 
-  const smtpAddress = document.getElementById("smtpaddress").value;
-  const smtpPort = document.getElementById("smtpport").value;
-  const encryption = document.querySelector('input[name="encryption"]:checked').value;
-  const smtpUsername = document.getElementById("smtpusername").value;
-  const smtpPassword = document.getElementById("smtppassword").value;
-  const fromEmail = document.getElementById("fromemail").value;
+  try {
+    const smtpAddress = document.getElementById("smtpaddress").value;
+    const smtpPort = document.getElementById("smtpport").value;
+    const encryption = getSelectedEncryption();
+    const smtpUsername = document.getElementById("smtpusername").value;
+    const smtpPassword = document.getElementById("smtppassword").value;
+    const fromEmail = document.getElementById("fromemail").value;
 
-  const data = {
-    smtpaddress: smtpAddress,
-    smtpport: smtpPort,
-    encryption: encryption,
-    smtpusername: smtpUsername,
-    smtppassword: smtpPassword,
-    fromemail: fromEmail
-  };
+    const data = {
+      smtpaddress: smtpAddress,
+      smtpport: smtpPort,
+      encryption: encryption,
+      smtpusername: smtpUsername,
+      smtppassword: smtpPassword,
+      fromemail: fromEmail
+    };
 
-  fetch('endpoints/admin/savesmtpsettings.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': window.csrfToken,
-    },
-    body: JSON.stringify(data),
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const emailVerificationCheckbox = document.getElementById('requireEmail');
-        emailVerificationCheckbox.disabled = false;
-        showSuccessMessage(data.message);
-      } else {
-        showErrorMessage(data.message);
-      }
-      button.disabled = false;
+    fetch('endpoints/admin/savesmtpsettings.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': window.csrfToken,
+      },
+      body: JSON.stringify(data),
     })
-    .catch((error) => {
-      showErrorMessage(error);
-      button.disabled = false;
-    });
-
+      .then(response => parseJsonResponse(response))
+      .then(data => {
+        if (data.success) {
+          const emailVerificationCheckbox = document.getElementById('requireEmail');
+          emailVerificationCheckbox.disabled = false;
+          showSuccessMessage(data.message);
+        } else {
+          showErrorMessage(data.message);
+        }
+        button.disabled = false;
+      })
+      .catch((error) => {
+        showErrorMessage(error.message || String(error));
+        button.disabled = false;
+      });
+  } catch (error) {
+    showErrorMessage(error.message || String(error));
+    button.disabled = false;
+  }
 }
 
 function backupDB() {

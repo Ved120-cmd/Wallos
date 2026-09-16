@@ -28,6 +28,20 @@ function toggleDropdown() {
   isDropdownOpen = !isDropdownOpen;
 }
 
+function getSelectedEncryption(fallback = "tls") {
+  const selected = document.querySelector('input[name="encryption"]:checked');
+  return selected ? selected.value : fallback;
+}
+
+async function parseJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(text.trim() || translate("unknown_error"));
+  }
+}
+
 function showErrorMessage(message) {
   const toast = document.querySelector(".toast#errorToast");
   const closeIcon = document.querySelector(".close-error");
