@@ -552,6 +552,11 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                         </div>
                         <div class="settings-notes">
                             <p>
+                                <i class="fa-solid fa-circle-info"></i>
+                                Emails are always sent as the Gmail account that authorized this refresh token &mdash;
+                                Google does not allow sending as any other address.
+                            </p>
+                            <p>
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                                 If your Google Cloud OAuth consent screen is still in <strong>Testing</strong> mode, this
                                 refresh token expires after about <strong>7 days</strong> and notifications will silently
@@ -559,11 +564,6 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                                 token weekly to avoid this.
                             </p>
                         </div>
-                    </div>
-                    <div class="form-group-inline">
-                        <input type="text" name="fromemail" id="fromemail" autocomplete="off"
-                            placeholder="<?= translate('from_email', $i18n) ?>"
-                            value="<?= htmlspecialchars($notificationsEmail['from_email']) ?>" />
                     </div>
                     <label for="otheremails"><?= translate('send_to_other_emails', $i18n) ?></label>
                     <div class="form-group-inline">

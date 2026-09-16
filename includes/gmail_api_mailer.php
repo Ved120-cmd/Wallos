@@ -126,9 +126,12 @@ function send_gmail_api_message(
 ): void {
     $accessToken = gmail_api_get_access_token($clientId, $clientSecret, $refreshToken);
 
-    if ($fromEmail === '') {
-        $fromEmail = gmail_api_get_own_email($accessToken);
-    }
+    // Gmail rejects (401 Unauthorized) any send where From doesn't exactly
+    // match the account the access token belongs to - it can never be used
+    // to send "as" a different address. Always use the authenticated
+    // account's own address rather than trusting whatever was typed into
+    // the "From email" field.
+    $fromEmail = gmail_api_get_own_email($accessToken);
 
     $raw = gmail_api_build_raw_message($fromEmail, $fromName, $recipients, $ccEmails, $subject, $body);
     $encodedRaw = rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');

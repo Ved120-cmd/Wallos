@@ -65,7 +65,6 @@ function saveNotificationsEmailButton() {
 
     try {
       const enabled = document.getElementById("emailenabled").checked ? 1 : 0;
-      const fromEmail = document.getElementById("fromemail").value;
       const otherEmails = document.getElementById("otheremails").value;
       const gmailClientId = document.getElementById("gmailclientid").value;
       const gmailClientSecret = document.getElementById("gmailclientsecret").value;
@@ -74,7 +73,6 @@ function saveNotificationsEmailButton() {
       const data = {
         enabled: enabled,
         authmethod: "gmail_api",
-        fromemail: fromEmail,
         otheremails: otherEmails,
         gmailclientid: gmailClientId,
         gmailclientsecret: gmailClientSecret,
@@ -93,14 +91,12 @@ function testNotificationEmailButton()  {
     button.disabled = true;
 
     try {
-      const fromEmail = document.getElementById("fromemail").value;
       const gmailClientId = document.getElementById("gmailclientid").value;
       const gmailClientSecret = document.getElementById("gmailclientsecret").value;
       const gmailRefreshToken = document.getElementById("gmailrefreshtoken").value;
 
       const data = {
         authmethod: "gmail_api",
-        fromemail: fromEmail,
         gmailclientid: gmailClientId,
         gmailclientsecret: gmailClientSecret,
         gmailrefreshtoken: gmailRefreshToken
