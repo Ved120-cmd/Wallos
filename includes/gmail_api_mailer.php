@@ -56,27 +56,6 @@ function gmail_api_get_access_token(string $clientId, string $clientSecret, stri
     return $data['access_token'];
 }
 
-function gmail_api_get_own_email(string $accessToken): string
-{
-    $ch = curl_init('https://gmail.googleapis.com/gmail/v1/users/me/profile');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $accessToken]);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    $data = $response !== false ? json_decode($response, true) : null;
-
-    if ($httpCode >= 400 || !isset($data['emailAddress'])) {
-        throw new GmailApiMailerException("Could not determine the Gmail account's address.");
-    }
-
-    return $data['emailAddress'];
-}
-
 /**
  * @param array<int, array{email: string, name: string}> $recipients
  * @param string[] $ccEmails Plain email addresses (no display names)
@@ -89,17 +68,22 @@ function gmail_api_build_raw_message(
     string $subject,
     string $body
 ): string {
-    $fromHeader = $fromName !== '' ? "{$fromName} <{$fromEmail}>" : $fromEmail;
-
     $toHeader = implode(', ', array_map(
         static fn($recipient) => $recipient['name'] !== '' ? "{$recipient['name']} <{$recipient['email']}>" : $recipient['email'],
         $recipients
     ));
 
-    $lines = [
-        'From: ' . $fromHeader,
-        'To: ' . $toHeader,
-    ];
+    $lines = [];
+
+    // Omit From entirely when no address is known - Gmail fills in the
+    // authenticated account's address automatically. Setting it ourselves
+    // would need it to exactly match that account anyway (mismatches are
+    // rejected), so there's no upside to guessing.
+    if ($fromEmail !== '') {
+        $lines[] = 'From: ' . ($fromName !== '' ? "{$fromName} <{$fromEmail}>" : $fromEmail);
+    }
+
+    $lines[] = 'To: ' . $toHeader;
 
     if (!empty($ccEmails)) {
         $lines[] = 'Cc: ' . implode(', ', $ccEmails);
@@ -133,13 +117,11 @@ function send_gmail_api_message(
 ): void {
     $accessToken = gmail_api_get_access_token($clientId, $clientSecret, $refreshToken);
 
-    // Gmail rejects (401 Unauthorized) any send where From doesn't exactly
-    // match the account the access token belongs to - it can never be used
-    // to send "as" a different address. Always use the authenticated
-    // account's own address rather than trusting whatever was typed into
-    // the "From email" field.
-    $fromEmail = gmail_api_get_own_email($accessToken);
-
+    // Deliberately not calling users.getProfile to resolve the sender address:
+    // the gmail.send scope (the minimum needed to send mail) does not grant
+    // permission to read the profile, so that call 403s. Gmail fills in the
+    // From address for the authenticated account automatically when the raw
+    // message omits it, so leave fromEmail blank and let the API do that.
     $raw = gmail_api_build_raw_message($fromEmail, $fromName, $recipients, $ccEmails, $subject, $body);
     $encodedRaw = rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');
 
