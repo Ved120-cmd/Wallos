@@ -42,8 +42,15 @@ function gmail_api_get_access_token(string $clientId, string $clientSecret, stri
     $data = json_decode($response, true);
 
     if ($httpCode >= 400 || !isset($data['access_token'])) {
-        $message = $data['error_description'] ?? $data['error'] ?? 'Unknown error refreshing the access token';
-        throw new GmailApiMailerException('Google OAuth error: ' . $message);
+        if (is_array($data) && (isset($data['error_description']) || isset($data['error']))) {
+            $message = ($data['error'] ?? '') . (isset($data['error_description']) ? ': ' . $data['error_description'] : '');
+        } else {
+            // Not the JSON shape Google's token endpoint normally returns -
+            // show the raw response so the real cause is visible instead of
+            // a generic fallback string.
+            $message = 'unexpected response body: ' . substr($response, 0, 500);
+        }
+        throw new GmailApiMailerException('Google OAuth error (HTTP ' . $httpCode . '): ' . $message);
     }
 
     return $data['access_token'];
