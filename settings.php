@@ -234,6 +234,7 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
     $rowCount = 0;
     while ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $notificationsEmail['enabled'] = $row['enabled'];
+        $notificationsEmail['auth_method'] = $row['auth_method'] ?? 'smtp';
         $notificationsEmail['smtp_address'] = $row['smtp_address'];
         $notificationsEmail['smtp_port'] = $row['smtp_port'];
         $notificationsEmail['encryption'] = $row['encryption'];
@@ -241,11 +242,15 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
         $notificationsEmail['smtp_password'] = $row['smtp_password'];
         $notificationsEmail['from_email'] = $row['from_email'];
         $notificationsEmail['other_emails'] = $row['other_emails'];
+        $notificationsEmail['gmail_client_id'] = $row['gmail_client_id'] ?? '';
+        $notificationsEmail['gmail_client_secret'] = $row['gmail_client_secret'] ?? '';
+        $notificationsEmail['gmail_refresh_token'] = $row['gmail_refresh_token'] ?? '';
         $rowCount++;
     }
 
     if ($rowCount == 0) {
         $notificationsEmail['enabled'] = 0;
+        $notificationsEmail['auth_method'] = "smtp";
         $notificationsEmail['smtp_address'] = "";
         $notificationsEmail['smtp_port'] = 587;
         $notificationsEmail['encryption'] = "tls";
@@ -253,6 +258,9 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
         $notificationsEmail['smtp_password'] = "";
         $notificationsEmail['from_email'] = "";
         $notificationsEmail['other_emails'] = "";
+        $notificationsEmail['gmail_client_id'] = "";
+        $notificationsEmail['gmail_client_secret'] = "";
+        $notificationsEmail['gmail_refresh_token'] = "";
     }
 
     // Discord notifications
@@ -512,41 +520,97 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                         <label for="emailenabled" class="capitalize"><?= translate('enabled', $i18n) ?></label>
                     </div>
                     <div class="form-group-inline">
-                        <input type="text" name="smtpaddress" id="smtpaddress" autocomplete="off"
-                            placeholder="<?= translate('smtp_address', $i18n) ?>"
-                            value="<?= htmlspecialchars($notificationsEmail['smtp_address']) ?>" />
-                        <input type="text" name="smtpport" id="smtpport" autocomplete="off"
-                            placeholder="<?= translate('port', $i18n) ?>" class="one-third"
-                            value="<?= htmlspecialchars($notificationsEmail['smtp_port']) ?>" />
+                        <div>
+                            <input type="radio" name="authmethod" id="authmethodsmtp" value="smtp"
+                                onchange="toggleEmailAuthMethod()"
+                                <?= ($notificationsEmail['auth_method'] ?? 'smtp') == "smtp" ? "checked" : "" ?> />
+                            <label for="authmethodsmtp">SMTP</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="authmethod" id="authmethodgmailapi" value="gmail_api"
+                                onchange="toggleEmailAuthMethod()"
+                                <?= ($notificationsEmail['auth_method'] ?? 'smtp') == "gmail_api" ? "checked" : "" ?> />
+                            <label for="authmethodgmailapi">Gmail API</label>
+                        </div>
                     </div>
-                    <div class="form-group-inline">
-                        <div>
-                            <input type="radio" name="encryption" id="encryptionnone" value="none"
-                                <?= empty($notificationsEmail['encryption']) || $notificationsEmail['encryption'] == "none" ? "checked" : "" ?> />
-                            <label for="encryptionnone"><?= translate('none', $i18n) ?></label>
+                    <div id="smtpAuthFields">
+                        <div class="form-group-inline">
+                            <input type="text" name="smtpaddress" id="smtpaddress" autocomplete="off"
+                                placeholder="<?= translate('smtp_address', $i18n) ?>"
+                                value="<?= htmlspecialchars($notificationsEmail['smtp_address']) ?>" />
+                            <input type="text" name="smtpport" id="smtpport" autocomplete="off"
+                                placeholder="<?= translate('port', $i18n) ?>" class="one-third"
+                                value="<?= htmlspecialchars($notificationsEmail['smtp_port']) ?>" />
                         </div>
-                        <div>
-                            <input type="radio" name="encryption" id="encryptiontls" value="tls"
-                                <?= $notificationsEmail['encryption'] == "tls" ? "checked" : "" ?> />
-                            <label for="encryptiontls"><?= translate('tls', $i18n) ?></label>
-                        </div>
-                        <div>
-                            <input type="radio" name="encryption" id="encryptionssl" value="ssl"
-                                <?= $notificationsEmail['encryption'] == "ssl" ? "checked" : "" ?> />
-                            <label for="encryptionssl"><?= translate('ssl', $i18n) ?></label>
-                        </div>
+                        <div class="form-group-inline">
+                            <div>
+                                <input type="radio" name="encryption" id="encryptionnone" value="none"
+                                    <?= empty($notificationsEmail['encryption']) || $notificationsEmail['encryption'] == "none" ? "checked" : "" ?> />
+                                <label for="encryptionnone"><?= translate('none', $i18n) ?></label>
+                            </div>
+                            <div>
+                                <input type="radio" name="encryption" id="encryptiontls" value="tls"
+                                    <?= $notificationsEmail['encryption'] == "tls" ? "checked" : "" ?> />
+                                <label for="encryptiontls"><?= translate('tls', $i18n) ?></label>
+                            </div>
+                            <div>
+                                <input type="radio" name="encryption" id="encryptionssl" value="ssl"
+                                    <?= $notificationsEmail['encryption'] == "ssl" ? "checked" : "" ?> />
+                                <label for="encryptionssl"><?= translate('ssl', $i18n) ?></label>
+                            </div>
 
 
+                        </div>
+                        <div class="form-group-inline">
+                            <input type="text" name="smtpusername" id="smtpusername" autocomplete="off"
+                                placeholder="<?= translate('smtp_username', $i18n) ?>"
+                                value="<?= htmlspecialchars($notificationsEmail['smtp_username']) ?>" />
+                        </div>
+                        <div class="form-group-inline">
+                            <input type="password" name="smtppassword" id="smtppassword" autocomplete="off"
+                                placeholder="<?= translate('smtp_password', $i18n) ?>"
+                                value="<?= htmlspecialchars($notificationsEmail['smtp_password']) ?>" />
+                        </div>
                     </div>
-                    <div class="form-group-inline">
-                        <input type="text" name="smtpusername" id="smtpusername" autocomplete="off"
-                            placeholder="<?= translate('smtp_username', $i18n) ?>"
-                            value="<?= htmlspecialchars($notificationsEmail['smtp_username']) ?>" />
-                    </div>
-                    <div class="form-group-inline">
-                        <input type="password" name="smtppassword" id="smtppassword" autocomplete="off"
-                            placeholder="<?= translate('smtp_password', $i18n) ?>"
-                            value="<?= htmlspecialchars($notificationsEmail['smtp_password']) ?>" />
+                    <div id="gmailApiAuthFields">
+                        <details class="settings-notes gmail-api-help">
+                            <summary><i class="fa-solid fa-circle-question"></i> How to get these values</summary>
+                            <ol>
+                                <li>Go to <strong>console.cloud.google.com</strong> and create (or pick) a project.</li>
+                                <li><strong>APIs &amp; Services &rarr; Library</strong> &rarr; search "Gmail API" &rarr; Enable.</li>
+                                <li><strong>APIs &amp; Services &rarr; OAuth consent screen</strong> &rarr; User type: External &rarr; add scope
+                                    <code>https://www.googleapis.com/auth/gmail.send</code> &rarr; add the sending Gmail address as a test user.</li>
+                                <li><strong>APIs &amp; Services &rarr; Credentials &rarr; Create Credentials &rarr; OAuth client ID</strong> &rarr;
+                                    type "Desktop app". This gives you the <strong>Client ID</strong> and <strong>Client Secret</strong> below.</li>
+                                <li>Go to <strong>developers.google.com/oauthplayground</strong> &rarr; gear icon &rarr; check "Use your own OAuth
+                                    credentials" &rarr; paste your Client ID/Secret &rarr; select scope <code>gmail.send</code> &rarr; Authorize &rarr;
+                                    Exchange authorization code for tokens &rarr; copy the <strong>Refresh Token</strong>.</li>
+                            </ol>
+                        </details>
+                        <div class="form-group-inline">
+                            <input type="text" name="gmailclientid" id="gmailclientid" autocomplete="off"
+                                placeholder="Gmail OAuth Client ID"
+                                value="<?= htmlspecialchars($notificationsEmail['gmail_client_id']) ?>" />
+                        </div>
+                        <div class="form-group-inline">
+                            <input type="password" name="gmailclientsecret" id="gmailclientsecret" autocomplete="off"
+                                placeholder="Gmail OAuth Client Secret"
+                                value="<?= htmlspecialchars($notificationsEmail['gmail_client_secret']) ?>" />
+                        </div>
+                        <div class="form-group-inline">
+                            <input type="password" name="gmailrefreshtoken" id="gmailrefreshtoken" autocomplete="off"
+                                placeholder="Gmail OAuth Refresh Token"
+                                value="<?= htmlspecialchars($notificationsEmail['gmail_refresh_token']) ?>" />
+                        </div>
+                        <div class="settings-notes">
+                            <p>
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                If your Google Cloud OAuth consent screen is still in <strong>Testing</strong> mode, this
+                                refresh token expires after about <strong>7 days</strong> and notifications will silently
+                                stop sending. Publish the OAuth consent screen (Production) or re-generate the refresh
+                                token weekly to avoid this.
+                            </p>
+                        </div>
                     </div>
                     <div class="form-group-inline">
                         <input type="text" name="fromemail" id="fromemail" autocomplete="off"
@@ -572,6 +636,9 @@ $upcomingPaymentsLimit = normalize_upcoming_payments_limit($settings['upcoming_p
                         </p>
                         <p>
                     </div>
+                    <script type="text/javascript">
+                        toggleEmailAuthMethod();
+                    </script>
                 </div>
             </section>
             <section class="account-notifications-section">

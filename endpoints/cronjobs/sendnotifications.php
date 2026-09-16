@@ -14,6 +14,7 @@ require __DIR__ . '/../../libs/PHPMailer/Exception.php';
 
 require __DIR__ . '/../../includes/currency_formatter.php';
 require __DIR__ . '/../../includes/budget_period_calculations.php';
+require __DIR__ . '/../../includes/gmail_api_mailer.php';
 
 require 'settimezone.php';
 
@@ -124,13 +125,17 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
 
     if ($row = $result->fetchArray(PDO::FETCH_ASSOC)) {
         $emailNotificationsEnabled = $row['enabled'];
+        $email['authMethod'] = $row['auth_method'] ?? 'smtp';
         $email['smtpAddress'] = $row["smtp_address"];
         $email['smtpPort'] = $row["smtp_port"];
         $email['encryption'] = $row["encryption"];
         $email['smtpUsername'] = $row["smtp_username"];
         $email['smtpPassword'] = $row["smtp_password"];
-        $email['fromEmail'] = $row["from_email"] ? $row["from_email"] : "wallos@wallosapp.com";
+        $email['fromEmail'] = $row["from_email"] ? $row["from_email"] : ($email['authMethod'] === 'gmail_api' ? "" : "wallos@wallosapp.com");
         $email['otherEmails'] = $row["other_emails"];
+        $email['gmailClientId'] = $row['gmail_client_id'] ?? '';
+        $email['gmailClientSecret'] = $row['gmail_client_secret'] ?? '';
+        $email['gmailRefreshToken'] = $row['gmail_refresh_token'] ?? '';
     }
 
     // Check if Discord notifications are enabled and get the settings
@@ -379,9 +384,12 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
 
             // Email notifications if enabled
             if ($emailNotificationsEnabled) {
+                $useGmailApi = $email['authMethod'] === 'gmail_api';
+
                 // Re-validate at send time: a save-time check alone is bypassable via
                 // DNS rebinding between when the host was saved and when the cron fires.
-                if (!validate_smtp_host($email['smtpAddress'], (int) $email['smtpPort'], $db)) {
+                // Not applicable to the Gmail API path - there's no SMTP host to pin.
+                if (!$useGmailApi && !validate_smtp_host($email['smtpAddress'], (int) $email['smtpPort'], $db)) {
                     echo "SSRF attempt detected for SMTP host. Email notifications not sent.<br />";
                 } else {
 
@@ -395,6 +403,47 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
                 foreach ($notify as $userId => $perUser) {
                     $message = buildNotificationMessage("", $perUser, $periodSummaryLine, $sendPeriodStartSummaryOnly);
                     if ($message === "") {
+                        continue;
+                    }
+
+                    $stmt = $db->prepare('SELECT * FROM household WHERE id = :userId');
+                    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+                    $result = $stmt->execute();
+                    $user = $result->fetchArray(PDO::FETCH_ASSOC);
+
+                    $emailaddress = !empty($user['email']) ? $user['email'] : $defaultEmail;
+                    $name = !empty($user['name']) ? $user['name'] : $defaultName;
+
+                    $ccEmails = [];
+                    if (!empty($email['otherEmails'])) {
+                        $list = explode(';', $email['otherEmails']);
+
+                        // Avoid duplicate emails
+                        $list = array_unique($list);
+                        $list = array_filter($list, function ($value) use ($emailaddress) {
+                            return $value !== $emailaddress;
+                        });
+
+                        $ccEmails = array_map('trim', $list);
+                    }
+
+                    if ($useGmailApi) {
+                        try {
+                            send_gmail_api_message(
+                                $email['gmailClientId'],
+                                $email['gmailClientSecret'],
+                                $email['gmailRefreshToken'],
+                                $email['fromEmail'],
+                                'Wallos App',
+                                [['email' => $emailaddress, 'name' => $name]],
+                                $ccEmails,
+                                'Wallos Notification',
+                                $message
+                            );
+                            echo "Email Notifications sent (Gmail API)<br />";
+                        } catch (GmailApiMailerException $e) {
+                            echo "Error sending notifications: " . $e->getMessage() . "<br />";
+                        }
                         continue;
                     }
 
@@ -422,29 +471,11 @@ while ($userToNotify = $usersToNotify->fetchArray(PDO::FETCH_ASSOC)) {
 
                     $mail->Port = $email['smtpPort'];
 
-                    $stmt = $db->prepare('SELECT * FROM household WHERE id = :userId');
-                    $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
-                    $result = $stmt->execute();
-                    $user = $result->fetchArray(PDO::FETCH_ASSOC);
-
-                    $emailaddress = !empty($user['email']) ? $user['email'] : $defaultEmail;
-                    $name = !empty($user['name']) ? $user['name'] : $defaultName;
-
                     $mail->setFrom($email['fromEmail'], 'Wallos App');
                     $mail->addAddress($emailaddress, $name);
 
-                    if (!empty($email['otherEmails'])) {
-                        $list = explode(';', $email['otherEmails']);
-
-                        // Avoid duplicate emails
-                        $list = array_unique($list);
-                        $list = array_filter($list, function ($value) use ($emailaddress) {
-                            return $value !== $emailaddress;
-                        });
-
-                        foreach ($list as $value) {
-                            $mail->addCC(trim($value));
-                        }
+                    foreach ($ccEmails as $value) {
+                        $mail->addCC($value);
                     }
 
                     $mail->Subject = 'Wallos Notification';

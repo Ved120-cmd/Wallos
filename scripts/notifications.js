@@ -59,12 +59,26 @@ function saveNotifications() {
     makeFetchCall(url, data, button);
 }
 
+function getSelectedEmailAuthMethod() {
+    const checked = document.querySelector('input[name="authmethod"]:checked');
+    return checked ? checked.value : "smtp";
+}
+
+function toggleEmailAuthMethod() {
+    const isGmailApi = getSelectedEmailAuthMethod() === "gmail_api";
+    const smtpFields = document.getElementById("smtpAuthFields");
+    const gmailFields = document.getElementById("gmailApiAuthFields");
+    if (smtpFields) smtpFields.hidden = isGmailApi;
+    if (gmailFields) gmailFields.hidden = !isGmailApi;
+}
+
 function saveNotificationsEmailButton() {
     const button = document.getElementById("saveNotificationsEmail");
     button.disabled = true;
 
     try {
       const enabled = document.getElementById("emailenabled").checked ? 1 : 0;
+      const authMethod = getSelectedEmailAuthMethod();
       const smtpAddress = document.getElementById("smtpaddress").value;
       const smtpPort = document.getElementById("smtpport").value;
       const encryption = getSelectedEncryption();
@@ -72,16 +86,23 @@ function saveNotificationsEmailButton() {
       const smtpPassword = document.getElementById("smtppassword").value;
       const fromEmail = document.getElementById("fromemail").value;
       const otherEmails = document.getElementById("otheremails").value;
+      const gmailClientId = document.getElementById("gmailclientid").value;
+      const gmailClientSecret = document.getElementById("gmailclientsecret").value;
+      const gmailRefreshToken = document.getElementById("gmailrefreshtoken").value;
 
       const data = {
         enabled: enabled,
+        authmethod: authMethod,
         smtpaddress: smtpAddress,
         smtpport: smtpPort,
         encryption: encryption,
         smtpusername: smtpUsername,
         smtppassword: smtpPassword,
         fromemail: fromEmail,
-        otheremails: otherEmails
+        otheremails: otherEmails,
+        gmailclientid: gmailClientId,
+        gmailclientsecret: gmailClientSecret,
+        gmailrefreshtoken: gmailRefreshToken
       };
 
       makeFetchCall('endpoints/notifications/saveemailnotifications.php', data, button);
@@ -90,26 +111,34 @@ function saveNotificationsEmailButton() {
       button.disabled = false;
     }
 }
-  
+
 function testNotificationEmailButton()  {
     const button = document.getElementById("testNotificationsEmail");
     button.disabled = true;
 
     try {
+      const authMethod = getSelectedEmailAuthMethod();
       const smtpAddress = document.getElementById("smtpaddress").value;
       const smtpPort = document.getElementById("smtpport").value;
       const encryption = getSelectedEncryption();
       const smtpUsername = document.getElementById("smtpusername").value;
       const smtpPassword = document.getElementById("smtppassword").value;
       const fromEmail = document.getElementById("fromemail").value;
+      const gmailClientId = document.getElementById("gmailclientid").value;
+      const gmailClientSecret = document.getElementById("gmailclientsecret").value;
+      const gmailRefreshToken = document.getElementById("gmailrefreshtoken").value;
 
       const data = {
+        authmethod: authMethod,
         smtpaddress: smtpAddress,
         smtpport: smtpPort,
         encryption: encryption,
         smtpusername: smtpUsername,
         smtppassword: smtpPassword,
-        fromemail: fromEmail
+        fromemail: fromEmail,
+        gmailclientid: gmailClientId,
+        gmailclientsecret: gmailClientSecret,
+        gmailrefreshtoken: gmailRefreshToken
       };
 
       makeFetchCall('endpoints/notifications/testemailnotifications.php', data, button);
